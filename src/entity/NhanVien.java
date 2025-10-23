@@ -1,8 +1,4 @@
-
-// test dữ liệu
-
 package entity;
-// lấy về test
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -14,6 +10,8 @@ public class NhanVien {
 	private boolean chucVu;
 	private LocalDate thoiGianTao;
 	private boolean trangThai;
+	private boolean gioiTinh;
+	private LocalDate ngaySinh;
 	
 	public NhanVien() {	
 	}
@@ -22,19 +20,20 @@ public class NhanVien {
 		this.maNhanVien = maNhanVien;
 	}
 
-	public NhanVien(String maNhanVien, String hoten, String soDienThoai, String email, boolean vaiTro,
-			LocalDate thoiGianTao, boolean trangThai) {
+	public NhanVien(String maNhanVien, String hoten, String soDienThoai, String email, boolean chucVu,
+			LocalDate thoiGianTao, boolean trangThai, boolean gioiTinh, LocalDate ngaySinh) {
 		super();
 		this.maNhanVien = maNhanVien;
 		this.hoten = hoten;
 		this.soDienThoai = soDienThoai;
 		this.email = email;
-		this.chucVu = vaiTro;
+		this.chucVu = chucVu;
 		this.thoiGianTao = thoiGianTao;
 		this.trangThai = trangThai;
+		this.gioiTinh = gioiTinh;
+		this.ngaySinh = ngaySinh;
 	}
 
-	
 	public String getMaNhanVien() {
 		return maNhanVien;
 	}
@@ -67,12 +66,12 @@ public class NhanVien {
 		this.email = email;
 	}
 
-	public boolean isVaiTro() {
+	public boolean isChucVu() {
 		return chucVu;
 	}
 
-	public void setVaiTro(boolean vaiTro) {
-		this.chucVu = vaiTro;
+	public void setChucVu(boolean chucVu) {
+		this.chucVu = chucVu;
 	}
 
 	public LocalDate getThoiGianTao() {
@@ -91,28 +90,22 @@ public class NhanVien {
 		this.trangThai = trangThai;
 	}
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(maNhanVien);
+	public boolean isGioiTinh() {
+		return gioiTinh;
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		NhanVien other = (NhanVien) obj;
-		return Objects.equals(maNhanVien, other.maNhanVien);
+	public void setGioiTinh(boolean gioiTinh) {
+		this.gioiTinh = gioiTinh;
 	}
 
-	@Override
-	public String toString() {
-		return "NhanVien [maNhanVien=" + maNhanVien + ", hoten=" + hoten + ", soDienThoai=" + soDienThoai + ", email="
-				+ email + ", vaiTro=" + chucVu + ", thoiGianTao=" + thoiGianTao + ", trangThai=" + trangThai + "]";
+	public LocalDate getNgaySinh() {
+		return ngaySinh;
 	}
+
+	public void setNgaySinh(LocalDate ngaySinh) {
+		this.ngaySinh = ngaySinh;
+	}
+
 	
 	
 }
