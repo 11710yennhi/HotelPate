@@ -39,7 +39,6 @@ public class PhieuDatPhong {
         capNhatTongTien();
     }
 
-    // Getter & Setter
     public String getMaPhieuDatPhong() {
         return maPhieuDatPhong;
     }
