@@ -98,9 +98,6 @@ public class PhieuDatPhong {
         capNhatTongTien();
     }
 
-    // -------------------------------
-    // Các phương thức xử lý chính
-    // -------------------------------
 
     public void themChiTiet(ChiTietPhieuDatPhong ct) {
         dsChiTiet.add(ct);
@@ -112,28 +109,27 @@ public class PhieuDatPhong {
         capNhatTongTien();
     }
 
-    // ✅ Cập nhật riêng từng phần và tổng cộng
     public void capNhatTongTien() {
         tongTienPhong = 0;
         tongTienChiPhiPhatSinh = 0;
 
-        // Tính tổng tiền phòng
+        
         if (dsChiTiet != null) {
             for (ChiTietPhieuDatPhong ct : dsChiTiet) {
                 tongTienPhong += ct.getPhong().getLoaiPhong().getGia();
             }
         }
 
-        // Tính tổng chi phí phát sinh
+       
         if (dsChiPhiPhatSinh != null) {
             for (ChiTietChiPhiPhatSinh cp : dsChiPhiPhatSinh) {
                 tongTienChiPhiPhatSinh += cp.getThanhTien();
             }
         }
 
-        // Tổng cộng và tiền cọc
+     
         tongTien = tongTienPhong + tongTienChiPhiPhatSinh;
-        tienCoc = tongTienPhong * 0.5; // chỉ tính 50% tiền phòng
+        tienCoc = tongTienPhong * 0.5; 
     }
 
     public double getTongTienPhong() {
