@@ -9,7 +9,6 @@ public class ChiTietPhieuDatPhong {
     private Phong phong;
     private LocalDate ngayNhanThuc;
     private LocalDate ngayTraThuc;
-    private double thanhTien; 
     private String trangThai;
 
     public ChiTietPhieuDatPhong() {
@@ -22,10 +21,10 @@ public class ChiTietPhieuDatPhong {
         this.ngayNhanThuc = ngayNhanThuc;
         this.ngayTraThuc = ngayTraThuc;
         this.trangThai = trangThai;
-        this.thanhTien = tinhThanhTien(); 
+        getThanhTien();
     }
 
-    // Getter & Setter
+    // ===== Getter & Setter =====
     public PhieuDatPhong getPhieuDatPhong() {
         return phieuDatPhong;
     }
@@ -58,10 +57,6 @@ public class ChiTietPhieuDatPhong {
         this.ngayTraThuc = ngayTraThuc;
     }
 
-    public double getThanhTien() {
-        return thanhTien;
-    }
-
     public String getTrangThai() {
         return trangThai;
     }
@@ -70,12 +65,18 @@ public class ChiTietPhieuDatPhong {
         this.trangThai = trangThai;
     }
 
-   
-    public double tinhThanhTien() {
-    	
-		return thanhTien;
-       
+    // ===== Thuộc tính dẫn xuất =====
+    public double getThanhTien() {
+        if (phong == null || ngayNhanThuc == null || ngayTraThuc == null) {
+            return 0;
+        }
+
+        long soNgay = ChronoUnit.DAYS.between(ngayNhanThuc, ngayTraThuc);
+        if (soNgay <= 0) soNgay = 1; // Tối thiểu 1 ngày
+
+        return phong.getLoaiPhong().getGia() * soNgay;
     }
+
 
     @Override
     public int hashCode() {
@@ -93,10 +94,12 @@ public class ChiTietPhieuDatPhong {
                 && Objects.equals(phong, other.phong);
     }
 
-    @Override
-    public String toString() {
-        return "ChiTietPhieuDatPhong [phieuDatPhong=" + phieuDatPhong + ", phong=" + phong
-                + ", ngayNhanThuc=" + ngayNhanThuc + ", ngayTraThuc=" + ngayTraThuc
-                + ", thanhTien=" + thanhTien + ", trangThai=" + trangThai + "]";
-    }
+	@Override
+	public String toString() {
+		return "ChiTietPhieuDatPhong [phieuDatPhong=" + phieuDatPhong + ", phong=" + phong + ", ngayNhanThuc="
+				+ ngayNhanThuc + ", ngayTraThuc=" + ngayTraThuc + ", trangThai=" + trangThai + "]";
+	}
+
+    
+   
 }
