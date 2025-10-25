@@ -3,7 +3,7 @@ package gui;
 import java.awt.*;
 import javax.swing.*;
 
-public class Phong_GUI {
+public class Phong_GUI extends JPanel{
 
     private JFrame frame;
     private JTextField textFieldMaKH;

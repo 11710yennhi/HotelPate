@@ -37,22 +37,22 @@ public class PhieuDatPhong_DAO {
     }
 
  
-    public boolean xoaPhieuDatPhong(String maPhieuDatPhong) {
-        String query = "DELETE FROM PhieuDatPhong WHERE maPhieuDatPhong = ?";
-
-        try (Connection con = ConnectDB.getConnection();
-             PreparedStatement ps = con.prepareStatement(query)) {
-
-            ps.setString(1, maPhieuDatPhong);
-
-            int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
+//    public boolean xoaPhieuDatPhong(String maPhieuDatPhong) {
+//        String query = "DELETE FROM PhieuDatPhong WHERE maPhieuDatPhong = ?";
+//
+//        try (Connection con = ConnectDB.getConnection();
+//             PreparedStatement ps = con.prepareStatement(query)) {
+//
+//            ps.setString(1, maPhieuDatPhong);
+//
+//            int rowsAffected = ps.executeUpdate();
+//            return rowsAffected > 0;
+//
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return false;
+//    }
 
 
     public PhieuDatPhong timPhieuDatPhongTheoMa(String maPhieuDatPhong) {
