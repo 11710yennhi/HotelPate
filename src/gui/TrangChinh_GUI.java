@@ -17,10 +17,11 @@ public class TrangChinh_GUI extends JFrame implements ActionListener {
     public TrangChinh_GUI() {
         setTitle("Pate Hotel - Hệ thống quản lý khách sạn");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setSize(1300, 800);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
-
+        
         Color mauXanhDam = new Color(30, 61, 89);
         Color mauVangDong = new Color(212, 175, 55);
         Color mauNen = new Color(249, 249, 249);
@@ -92,9 +93,13 @@ public class TrangChinh_GUI extends JFrame implements ActionListener {
         //pnlContent.add(new TrangChu_GUI(), "Trang Chủ");
         pnlContent.add(new DanhSachPhieuDatPhong_GUI(), "Danh Sách Phiếu Đặt Phòng");
         pnlContent.add(new TaoPhieuDatPhong_GUI(), "Tạo Phiếu Đặt Phòng");
-        pnlContent.add(new Phong_GUI(), "Phòng");
+   //     pnlContent.add(new Phong_GUI(), "Phòng");
 //        pnlContent.add(new HoaDon_GUI(), "Hóa Đơn");
        pnlContent.add(new NhanVien_GUI(), "Nhân Viên");
+       pnlContent.add(new ChiPhiPhatSinh_GUI(), "Chi Phí Phát Sinh");
+       pnlContent.add(new Phong_GUI(), "Quản Lý Phòng");
+
+
   //      pnlContent.add(new NhanVien_testtt(), "Nhân Viên");
 
        
@@ -211,5 +216,6 @@ public class TrangChinh_GUI extends JFrame implements ActionListener {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new TrangChinh_GUI().setVisible(true));
+        
     }
 }

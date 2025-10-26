@@ -2,17 +2,31 @@ package gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.List;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+
+import dao.LoaiPhong_DAO;
+import dao.Phong_DAO;
+import entity.LoaiPhong;
+import entity.Phong;
 
 public class Phong_GUI extends JPanel implements ActionListener, MouseListener {
 
     private JTextField textFieldMaPhong, textFieldTrangThai;
     private JComboBox<String> comboLoaiPhong;
     private JTable table;
-    private JButton btnChiTietLoaiPhong;
+    private JButton btnChiTietLoaiPhong, btnThem, btnLuu, btnTim;
+
+    private Phong_DAO phongDAO;
+    private LoaiPhong_DAO loaiPhongDAO;
+    private DefaultTableModel tableModel;
 
     public Phong_GUI() {
-        setLayout(new BorderLayout(15, 15));
+        phongDAO = new Phong_DAO();
+        loaiPhongDAO = new LoaiPhong_DAO();
+
+        setLayout(new BorderLayout(20, 20));
         setBackground(new Color(245, 245, 245));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
@@ -21,103 +35,94 @@ public class Phong_GUI extends JPanel implements ActionListener, MouseListener {
         lblTitle.setFont(new Font("Tahoma", Font.BOLD, 28));
         add(lblTitle, BorderLayout.NORTH);
 
-        // === Panel chính giữa: trái (form) - phải (ảnh) ===
-        JPanel centerPanel = new JPanel(new BorderLayout(30, 0));
+        // === Panel chính giữa ===
+        JPanel centerPanel = new JPanel(new GridBagLayout());
         centerPanel.setBackground(new Color(245, 245, 245));
         add(centerPanel, BorderLayout.CENTER);
 
-        // ==== Form bên trái ====
-        JPanel formPanel = new JPanel();
-        formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
-        formPanel.setBackground(new Color(245, 245, 245));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
         Font labelFont = new Font("Tahoma", Font.PLAIN, 16);
 
-        // --- Hàng Mã Phòng ---
-        JPanel rowMaPhong = new JPanel(new FlowLayout(FlowLayout.CENTER, 50, 20));
-        rowMaPhong.setBackground(new Color(245, 245, 245));
-        JLabel lblMaPhong = new JLabel("Mã Phòng: ");
+        // --- Mã Phòng ---
+        JLabel lblMaPhong = new JLabel("Mã Phòng:");
         lblMaPhong.setFont(labelFont);
-        textFieldMaPhong = new JTextField(50);
-        textFieldMaPhong.setPreferredSize(new Dimension(200, 25));
-        rowMaPhong.add(lblMaPhong);
-        rowMaPhong.add(textFieldMaPhong);
-        formPanel.add(rowMaPhong);
+        textFieldMaPhong = new JTextField(15);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        centerPanel.add(lblMaPhong, gbc);
+        gbc.gridx = 1;
+        centerPanel.add(textFieldMaPhong, gbc);
 
-        // --- Hàng Trạng Thái ---
-        JPanel rowTrangThai = new JPanel(new FlowLayout(FlowLayout.CENTER, 50, 20));
-        rowTrangThai.setBackground(new Color(245, 245, 245));
+        // --- Trạng Thái ---
         JLabel lblTrangThai = new JLabel("Trạng Thái:");
         lblTrangThai.setFont(labelFont);
-        textFieldTrangThai = new JTextField(50);
-        textFieldTrangThai.setPreferredSize(new Dimension(200, 25));
-        rowTrangThai.add(lblTrangThai);
-        rowTrangThai.add(textFieldTrangThai);
-        formPanel.add(rowTrangThai);
+        textFieldTrangThai = new JTextField(15);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        centerPanel.add(lblTrangThai, gbc);
+        gbc.gridx = 1;
+        centerPanel.add(textFieldTrangThai, gbc);
 
-        // --- Hàng Loại Phòng ---
-        JPanel rowLoaiPhong = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        rowLoaiPhong.setBackground(new Color(245, 245, 245));
-        JLabel lblLoaiPhong = new JLabel("Loại Phòng:           ");
+        // --- Loại Phòng ---
+        JLabel lblLoaiPhong = new JLabel("Loại Phòng:");
         lblLoaiPhong.setFont(labelFont);
-        comboLoaiPhong = new JComboBox<>(new String[]{"Standard", "Deluxe", "Family"});
-        comboLoaiPhong.setPreferredSize(new Dimension(500, 25));
+        comboLoaiPhong = new JComboBox<>();
+        comboLoaiPhong.setPreferredSize(new Dimension(200, 25));
 
-        // 🔍 Nút biểu tượng chi tiết
-        btnChiTietLoaiPhong = new JButton();
-        btnChiTietLoaiPhong.setToolTipText("Xem chi tiết loại phòng");
+        btnChiTietLoaiPhong = new JButton("🔍");
+        btnChiTietLoaiPhong.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 18));
         btnChiTietLoaiPhong.setFocusPainted(false);
         btnChiTietLoaiPhong.setBackground(Color.WHITE);
         btnChiTietLoaiPhong.setBorder(BorderFactory.createEmptyBorder());
         btnChiTietLoaiPhong.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        // Gán icon (nếu có sẵn ảnh trong src/image/)
-        ImageIcon iconSearch = new ImageIcon("src/image/icon_detail.png"); // bạn có thể thay bằng ảnh khác
-        if (iconSearch.getIconWidth() <= 0) {
-            // fallback: nếu không có ảnh thì dùng emoji
-            btnChiTietLoaiPhong.setText("🔍");
-            btnChiTietLoaiPhong.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 18));
-        } else {
-            btnChiTietLoaiPhong.setIcon(
-                    new ImageIcon(iconSearch.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH))
-            );
-        }
+        JPanel loaiPhongPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        loaiPhongPanel.setBackground(new Color(245, 245, 245));
+        loaiPhongPanel.add(comboLoaiPhong);
+        loaiPhongPanel.add(btnChiTietLoaiPhong);
 
-        btnChiTietLoaiPhong.addActionListener(this);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        centerPanel.add(lblLoaiPhong, gbc);
+        gbc.gridx = 1;
+        centerPanel.add(loaiPhongPanel, gbc);
 
-        rowLoaiPhong.add(lblLoaiPhong);
-        rowLoaiPhong.add(comboLoaiPhong);
-        rowLoaiPhong.add(btnChiTietLoaiPhong);
-        formPanel.add(rowLoaiPhong);
-
-        // ==== Hàng Nút ====
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 20));
+        // ==== Nút Thêm, Lưu, Tìm kiếm ====
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
         btnPanel.setBackground(new Color(245, 245, 245));
-        JButton btnThem = new JButton("Thêm");
-        JButton btnLuu = new JButton("Lưu");
-        JButton btnTim = new JButton("Tìm kiếm mã phòng");
+        btnThem = new JButton("Thêm");
+        btnLuu = new JButton("Lưu");
+        btnTim = new JButton("Tìm kiếm mã phòng");
         btnPanel.add(btnThem);
         btnPanel.add(btnLuu);
         btnPanel.add(btnTim);
-        formPanel.add(btnPanel);
 
-        centerPanel.add(formPanel, BorderLayout.CENTER);
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        centerPanel.add(btnPanel, gbc);
 
-        // ==== Ảnh bên phải ====
+        // ==== Ảnh phòng bên phải ====
         JLabel lblAnh = new JLabel();
         lblAnh.setHorizontalAlignment(SwingConstants.CENTER);
         lblAnh.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-        lblAnh.setPreferredSize(new Dimension(500, 300));
+        lblAnh.setPreferredSize(new Dimension(400, 250));
         lblAnh.setIcon(new ImageIcon(
-                new ImageIcon("src/image/room_main.jpg").getImage().getScaledInstance(500, 300, Image.SCALE_SMOOTH)
+                new ImageIcon("src/image/room_main.jpg").getImage()
+                        .getScaledInstance(400, 250, Image.SCALE_SMOOTH)
         ));
 
-        JPanel imagePanel = new JPanel(new BorderLayout());
-        imagePanel.setBackground(new Color(245, 245, 245));
-        imagePanel.add(lblAnh, BorderLayout.NORTH);
-        centerPanel.add(imagePanel, BorderLayout.EAST);
+        gbc.gridx = 2;
+        gbc.gridy = 0;
+        gbc.gridheight = 4;
+        gbc.anchor = GridBagConstraints.CENTER;
+        centerPanel.add(lblAnh, gbc);
 
-        // ==== Bảng danh sách ====
+        // ==== Bảng danh sách phòng ====
         JPanel tablePanel = new JPanel(new BorderLayout());
         tablePanel.setBackground(new Color(245, 245, 245));
         JLabel lblDS = new JLabel("DANH SÁCH PHÒNG", SwingConstants.CENTER);
@@ -126,43 +131,178 @@ public class Phong_GUI extends JPanel implements ActionListener, MouseListener {
         tablePanel.add(lblDS, BorderLayout.NORTH);
 
         String[] columns = {"STT", "Mã Phòng", "Loại Phòng", "Trạng Thái", "Sức Chứa", "Giá Phòng"};
-        Object[][] data = {};
-        table = new JTable(data, columns);
+        tableModel = new DefaultTableModel(columns, 0);
+        table = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(table);
         tablePanel.add(scrollPane, BorderLayout.CENTER);
 
         add(tablePanel, BorderLayout.SOUTH);
+
+
+        // ==== Đăng ký sự kiện ====
+        btnThem.addActionListener(this);
+        btnLuu.addActionListener(this);
+        btnTim.addActionListener(this);
+        table.addMouseListener(this);
+        
+        btnChiTietLoaiPhong.addActionListener(e -> {
+            JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(Phong_GUI.this), "Quản Lý Loại Phòng", true);
+            dialog.setSize(1000, 600);
+            dialog.setLocationRelativeTo(null);
+            dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            dialog.add(new LoaiPhong_GUI());
+            dialog.setVisible(true);
+        });
+
+
+        loadComboLoaiPhong();
+        loadTablePhong();
+    }
+
+    // ==== Load dữ liệu lên JComboBox Loại Phòng ====
+    private void loadComboLoaiPhong() {
+        comboLoaiPhong.removeAllItems();
+        List<LoaiPhong> dsLoai = loaiPhongDAO.getAllLoaiPhong();
+        for (LoaiPhong lp : dsLoai) {
+            comboLoaiPhong.addItem(lp.getMaLoaiPhong() + " - " + lp.getTenLoaiPhong());
+        }
+    }
+
+    // ==== Load dữ liệu lên JTable ====
+    private void loadTablePhong() {
+        tableModel.setRowCount(0);
+        List<Phong> dsPhong = phongDAO.layTatCaPhong();
+        int stt = 1;
+        for (Phong p : dsPhong) {
+            Object[] row = {
+                    stt++,
+                    p.getMaPhong(),
+                    p.getLoaiPhong() != null ? p.getLoaiPhong().getTenLoaiPhong() : "",
+                    p.getTrangThai(),
+                    p.getLoaiPhong() != null ? p.getLoaiPhong().getSuaChua() : "",
+                    p.getLoaiPhong() != null ? p.getLoaiPhong().getGia() : ""
+            };
+            tableModel.addRow(row);
+        }
     }
 
     // ==== Xử lý sự kiện ====
     @Override
     public void actionPerformed(ActionEvent e) {
         Object o = e.getSource();
-        if (o == btnChiTietLoaiPhong) {
-            String loai = (String) comboLoaiPhong.getSelectedItem();
-            JOptionPane.showMessageDialog(this,
-                    "Mở chi tiết loại phòng: " + loai,
-                    "Chi tiết loại phòng",
-                    JOptionPane.INFORMATION_MESSAGE);
-            // TODO: sau này bạn có thể mở form LoaiPhong_GUI ở đây
+//
+//        if (o == btnThem) {
+//        	
+//            textFieldMaPhong.setText("");
+//            textFieldTrangThai.setText("");
+//            if (comboLoaiPhong.getItemCount() > 0)
+//                comboLoaiPhong.setSelectedIndex(0);
+//
+//        } 
+        if (o == btnThem) {
+            String maPhong = textFieldMaPhong.getText().trim();
+            String trangThai = textFieldTrangThai.getText().trim();
+            String selected = (String) comboLoaiPhong.getSelectedItem();
+            if (maPhong.isEmpty() || selected == null) {
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin!");
+                return;
+            }
+            String maLoai = selected.split(" - ")[0];
+            LoaiPhong lp = loaiPhongDAO.getLoaiPhongTheoMa(maLoai);
+            Phong p = new Phong(maPhong, lp, trangThai);
+
+            if (phongDAO.themPhong(p)) {
+                JOptionPane.showMessageDialog(this, "Thêm phòng thành công!");
+            } else {
+                JOptionPane.showMessageDialog(this, "Thêm phòng thất bại!");
+            }
+            loadTablePhong();
+            // Reset form sau khi thêm
+            textFieldMaPhong.setText("");
+            textFieldTrangThai.setText("");
+            comboLoaiPhong.setSelectedIndex(0);
+        }
+
+        else if (o == btnLuu) {
+            String maPhong = textFieldMaPhong.getText().trim();
+            String trangThai = textFieldTrangThai.getText().trim();
+            String selected = (String) comboLoaiPhong.getSelectedItem();
+            if (maPhong.isEmpty() || selected == null) {
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin!");
+                return;
+            }
+            String maLoai = selected.split(" - ")[0];
+            LoaiPhong lp = loaiPhongDAO.getLoaiPhongTheoMa(maLoai);
+            Phong p = new Phong(maPhong, lp, trangThai);
+
+            // Kiểm tra tồn tại
+            if (phongDAO.timPhongTheoMa(maPhong) != null) {
+                if (phongDAO.capNhatPhong(p)) {
+                    JOptionPane.showMessageDialog(this, "Cập nhật phòng thành công!");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Cập nhật phòng thất bại!");
+                }
+            } else {
+                if (phongDAO.themPhong(p)) {
+                    JOptionPane.showMessageDialog(this, "Thêm phòng thành công!");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Thêm phòng thất bại!");
+                }
+            }
+            loadTablePhong();
+
+        } else if (o == btnTim) {
+            String maPhong = JOptionPane.showInputDialog(this, "Nhập mã phòng cần tìm:");
+            if (maPhong != null && !maPhong.trim().isEmpty()) {
+                Phong p = phongDAO.timPhongTheoMa(maPhong.trim());
+                if (p != null) {
+                    textFieldMaPhong.setText(p.getMaPhong());
+                    textFieldTrangThai.setText(p.getTrangThai());
+                    if (p.getLoaiPhong() != null) {
+                        for (int i = 0; i < comboLoaiPhong.getItemCount(); i++) {
+                            if (comboLoaiPhong.getItemAt(i).startsWith(p.getLoaiPhong().getMaLoaiPhong())) {
+                                comboLoaiPhong.setSelectedIndex(i);
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Không tìm thấy phòng!");
+                }
+            }
         }
     }
 
-    // ==== MouseListener ====
-    @Override public void mouseClicked(MouseEvent e) {}
+    // ==== MouseListener để điền thông tin khi click vào JTable ====
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        int row = table.getSelectedRow();
+        if (row >= 0) {
+            textFieldMaPhong.setText((String) table.getValueAt(row, 1));
+            textFieldTrangThai.setText((String) table.getValueAt(row, 3));
+            String tenLoai = (String) table.getValueAt(row, 2);
+            for (int i = 0; i < comboLoaiPhong.getItemCount(); i++) {
+                if (comboLoaiPhong.getItemAt(i).endsWith(tenLoai)) {
+                    comboLoaiPhong.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+    }
+
     @Override public void mousePressed(MouseEvent e) {}
     @Override public void mouseReleased(MouseEvent e) {}
     @Override public void mouseEntered(MouseEvent e) {}
     @Override public void mouseExited(MouseEvent e) {}
 
-    // ==== Test panel độc lập ====
+    // ===== CHẠY THỬ =====
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Test Panel Phong");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-            frame.add(new Phong_GUI());
-            frame.setVisible(true);
+            JFrame f = new JFrame("Quản Lý Phòng");
+            f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            f.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            f.add(new Phong_GUI());
+            f.setVisible(true);
         });
     }
 }
