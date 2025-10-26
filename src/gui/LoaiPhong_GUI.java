@@ -1,58 +1,66 @@
 package gui;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-
+import java.awt.event.*;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
 
-public class LoaiPhong_GUI extends JPanel implements ActionListener, MouseListener{
+import dao.LoaiPhong_DAO;
+import entity.LoaiPhong;
+
+public class LoaiPhong_GUI extends JPanel implements ActionListener, MouseListener {
 
     private JTextField txtMaLoai, txtTenLoai, txtSucChua, txtGia, txtMoTa;
     private JTable table;
+    private DefaultTableModel model;
+    private JButton btnThem, btnLuu, btnTim;
+    private LoaiPhong_DAO dao = new LoaiPhong_DAO();
 
     public LoaiPhong_GUI() {
+        initGUI();
+        loadData();
+    }
+
+    private void initGUI() {
         setLayout(new BorderLayout(10, 10));
         setBackground(Color.WHITE);
 
-        // ===== TIÊU ĐỀ =====
         JLabel lblTitle = new JLabel("QUẢN LÝ LOẠI PHÒNG", SwingConstants.CENTER);
         lblTitle.setFont(new Font("Tahoma", Font.BOLD, 26));
         lblTitle.setForeground(new Color(30, 60, 114));
         add(lblTitle, BorderLayout.NORTH);
 
-        // ===== PANEL THÔNG TIN =====
         JPanel infoPanel = new JPanel(new BorderLayout(10, 10));
         infoPanel.setBorder(new TitledBorder("Thông tin loại phòng"));
         infoPanel.setBackground(Color.WHITE);
         add(infoPanel, BorderLayout.NORTH);
 
-        // ===== FORM =====
+        // ==== FORM ====
         JPanel formPanel = new JPanel();
         formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
         formPanel.setBackground(Color.WHITE);
 
-        // Kích thước chung cho label và textfield
         Dimension lblSize = new Dimension(120, 25);
-        Dimension txtSize = new Dimension(300, 25); // rộng hơn một chút
+        Dimension txtSize = new Dimension(250, 25);
 
-        // ==== HÀNG 1: Mã loại phòng + Sức chứa ====
-        JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 10));
+        int horizontalGap = 70;
+        int verticalGap = 10;
+
+        // HÀNG 1: Mã loại phòng + Sức chứa
+        JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, horizontalGap, verticalGap));
         row1.setBackground(Color.WHITE);
 
         JLabel lblMa = new JLabel("Mã loại phòng:");
         lblMa.setPreferredSize(lblSize);
-        txtMaLoai = new JTextField();
+        txtMaLoai = new JTextField(40);
         txtMaLoai.setPreferredSize(txtSize);
 
         JLabel lblSucChua = new JLabel("Sức chứa:");
         lblSucChua.setPreferredSize(lblSize);
-        txtSucChua = new JTextField();
+        txtSucChua = new JTextField(40);
         txtSucChua.setPreferredSize(txtSize);
-        txtSucChua.setMargin(new Insets(2, 30, 2, 30));
 
         row1.add(lblMa);
         row1.add(txtMaLoai);
@@ -60,20 +68,19 @@ public class LoaiPhong_GUI extends JPanel implements ActionListener, MouseListen
         row1.add(txtSucChua);
         formPanel.add(row1);
 
-        // ==== HÀNG 2: Tên loại phòng + Mô tả  ====
-        JPanel row2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 10));
+        // HÀNG 2: Tên loại phòng + Mô tả
+        JPanel row2 = new JPanel(new FlowLayout(FlowLayout.LEFT, horizontalGap, verticalGap));
         row2.setBackground(Color.WHITE);
 
         JLabel lblTen = new JLabel("Tên loại phòng:");
         lblTen.setPreferredSize(lblSize);
-        txtTenLoai = new JTextField();
-        txtTenLoai.setPreferredSize(txtSize); // bằng Mã loại và Giá
-        
+        txtTenLoai = new JTextField(40);
+        txtTenLoai.setPreferredSize(txtSize);
+
         JLabel lblMoTa = new JLabel("Mô tả:");
         lblMoTa.setPreferredSize(lblSize);
-        txtMoTa = new JTextField();
+        txtMoTa = new JTextField(40);
         txtMoTa.setPreferredSize(txtSize);
-        txtMoTa.setMargin(new Insets(2, 30, 2, 30));
 
         row2.add(lblTen);
         row2.add(txtTenLoai);
@@ -81,16 +88,14 @@ public class LoaiPhong_GUI extends JPanel implements ActionListener, MouseListen
         row2.add(txtMoTa);
         formPanel.add(row2);
 
-        // ==== HÀNG 3: Giá ====
-        JPanel row3 = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 10));
+        // HÀNG 3: Giá
+        JPanel row3 = new JPanel(new FlowLayout(FlowLayout.LEFT, horizontalGap, verticalGap));
         row3.setBackground(Color.WHITE);
 
         JLabel lblGia = new JLabel("Giá:");
         lblGia.setPreferredSize(lblSize);
-        txtGia = new JTextField();
+        txtGia = new JTextField(40);
         txtGia.setPreferredSize(txtSize);
-
-
 
         row3.add(lblGia);
         row3.add(txtGia);
@@ -98,94 +103,161 @@ public class LoaiPhong_GUI extends JPanel implements ActionListener, MouseListen
 
         infoPanel.add(formPanel, BorderLayout.CENTER);
 
-        // ===== CỘT NÚT =====
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(30, 20, 30, 200));
-        buttonPanel.setBackground(Color.WHITE);
+        // Nút chức năng
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        btnThem = new JButton("Thêm");
+        btnLuu = new JButton("Lưu");
+        btnTim = new JButton("Tìm mã");
+        for (JButton b : new JButton[]{btnThem, btnLuu, btnTim}) {
+            b.addActionListener(this);
+            buttonPanel.add(b);
+        }
+        infoPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        JButton btnThem = new JButton("Thêm");
-        JButton btnLuu = new JButton("Lưu");
+        // ==== Table ====
+        String[] cols = {"Mã", "Tên", "Sức chứa", "Giá", "Mô tả"};
+        model = new DefaultTableModel(cols, 0);
+        table = new JTable(model);
+        table.addMouseListener(this);
+        JScrollPane sp = new JScrollPane(table);
+        add(sp, BorderLayout.CENTER);
+    }
 
-        Dimension btnSize = new Dimension(120, 35);
-        for (JButton btn : new JButton[]{btnThem, btnLuu}) {
-            btn.setAlignmentX(Component.CENTER_ALIGNMENT);
-            btn.setMaximumSize(btnSize);
-            btn.setPreferredSize(btnSize);
-            styleButton(btn);
-            buttonPanel.add(btn);
-            buttonPanel.add(Box.createVerticalStrut(10));
+    private void loadData() {
+        model.setRowCount(0);
+        List<LoaiPhong> list = dao.getAllLoaiPhong();
+        for (LoaiPhong lp : list) {
+            model.addRow(new Object[]{
+                    lp.getMaLoaiPhong(),
+                    lp.getTenLoaiPhong(),
+                    lp.getSuaChua(),
+                    lp.getGia(),
+                    lp.getMoTa()
+            });
+        }
+    }
+
+    // ==== Lấy dữ liệu từ form, an toàn với số và dữ liệu rỗng ====
+    private LoaiPhong getFromFormSafe() {
+        String ma = txtMaLoai.getText().trim();
+        String ten = txtTenLoai.getText().trim();
+        String sucChuaStr = txtSucChua.getText().trim();
+        String giaStr = txtGia.getText().trim();
+        String moTa = txtMoTa.getText().trim();
+
+        if (ma.isEmpty() || ten.isEmpty() || sucChuaStr.isEmpty() || giaStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin!");
+            return null;
         }
 
-        infoPanel.add(buttonPanel, BorderLayout.EAST);
+        int sucChua;
+        double gia;
+        try {
+            sucChua = Integer.parseInt(sucChuaStr);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Sức chứa phải là số nguyên!");
+            return null;
+        }
 
-        // ===== BẢNG DỮ LIỆU =====
-        JPanel tablePanel = new JPanel(new BorderLayout());
-        JLabel lblDS = new JLabel("Danh sách loại phòng");
-        lblDS.setFont(new Font("Tahoma", Font.BOLD, 18));
-        lblDS.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        tablePanel.add(lblDS, BorderLayout.NORTH);
+        try {
+            gia = Double.parseDouble(giaStr);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Giá phải là số!");
+            return null;
+        }
 
-        String[] columns = {"Mã loại phòng", "Tên loại phòng", "Sức chứa", "Giá", "Mô tả"};
-        Object[][] data = {};
-        table = new JTable(data, columns);
-        JScrollPane scrollPane = new JScrollPane(table);
-        tablePanel.add(scrollPane, BorderLayout.CENTER);
-
-        add(tablePanel, BorderLayout.CENTER);
+        return new LoaiPhong(ma, ten, sucChua, gia, moTa);
     }
 
-    private void styleButton(JButton btn) {
-        btn.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        btn.setBackground(new Color(220, 230, 250));
-        btn.setFocusPainted(false);
-        btn.setBorder(BorderFactory.createLineBorder(new Color(150, 150, 200)));
+    private void clearForm() {
+        txtMaLoai.setText("");
+        txtTenLoai.setText("");
+        txtSucChua.setText("");
+        txtGia.setText("");
+        txtMoTa.setText("");
+        table.clearSelection();
     }
 
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+    private void selectRow(String ma) {
+        for (int i = 0; i < model.getRowCount(); i++) {
+            if (model.getValueAt(i, 0).toString().equalsIgnoreCase(ma)) {
+                table.setRowSelectionInterval(i, i);
+                table.scrollRectToVisible(table.getCellRect(i, 0, true));
+                break;
+            }
+        }
+    }
 
-	@Override
-	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        Object src = e.getSource();
 
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+        if (src == btnThem) {
+            LoaiPhong lp = getFromFormSafe();
+            if (lp != null) {
+                if (dao.insertLoaiPhong(lp)) {
+                    JOptionPane.showMessageDialog(this, "✅ Thêm thành công!");
+                    loadData();
+                    clearForm();
+                } else {
+                    JOptionPane.showMessageDialog(this, "⚠️ Thêm thất bại! Mã có thể đã tồn tại.");
+                }
+            }
+        } else if (src == btnLuu) {
+            LoaiPhong lp = getFromFormSafe();
+            if (lp != null) {
+                if (dao.updateLoaiPhong(lp)) {
+                    JOptionPane.showMessageDialog(this, "💾 Cập nhật thành công!");
+                    loadData();
+                    clearForm();
+                } else {
+                    JOptionPane.showMessageDialog(this, "⚠️ Cập nhật thất bại! Kiểm tra mã.");
+                }
+            }
+        } else if (src == btnTim) {
+            String ma = txtMaLoai.getText().trim();
+            if (ma.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập mã cần tìm!");
+                return;
+            }
+            LoaiPhong lp = dao.findByMa(ma);
+            if (lp != null) {
+                txtTenLoai.setText(lp.getTenLoaiPhong());
+                txtSucChua.setText(String.valueOf(lp.getSuaChua()));
+                txtGia.setText(String.valueOf(lp.getGia()));
+                txtMoTa.setText(lp.getMoTa());
+                selectRow(ma);
+            } else {
+                JOptionPane.showMessageDialog(this, "⚠️ Không tìm thấy mã: " + ma);
+            }
+        }
+    }
 
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        int r = table.getSelectedRow();
+        if (r != -1) {
+            txtMaLoai.setText(model.getValueAt(r, 0).toString());
+            txtTenLoai.setText(model.getValueAt(r, 1).toString());
+            txtSucChua.setText(model.getValueAt(r, 2).toString());
+            txtGia.setText(model.getValueAt(r, 3).toString());
+            txtMoTa.setText(model.getValueAt(r, 4).toString());
+        }
+    }
 
-	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override public void mousePressed(MouseEvent e) {}
+    @Override public void mouseReleased(MouseEvent e) {}
+    @Override public void mouseEntered(MouseEvent e) {}
+    @Override public void mouseExited(MouseEvent e) {}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-    // Test panel độc lập
-//    public static void main(String[] args) {
-//        SwingUtilities.invokeLater(() -> {
-//            JFrame frame = new JFrame("Test Panel LoaiPhong");
-//            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-//            frame.add(new LoaiPhong_GUI());
-//            frame.setVisible(true);
-//        });
-//    }
+    // ==== Test frame độc lập ====
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            JFrame f = new JFrame("Quản lý loại phòng");
+            f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            f.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            f.add(new LoaiPhong_GUI());
+            f.setVisible(true);
+        });
+    }
 }

@@ -1,10 +1,9 @@
 package gui;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -12,7 +11,9 @@ import javax.swing.table.DefaultTableModel;
 
 import com.toedter.calendar.JDateChooser;
 
+import connectDB.ConnectDB;
 import dao.NhanVien_DAO;
+import entity.NhanVien;
 
 public class NhanVien_GUI extends JPanel implements ActionListener, MouseListener {
 
@@ -20,54 +21,64 @@ public class NhanVien_GUI extends JPanel implements ActionListener, MouseListene
     private JRadioButton rdoNam, rdoNu, rdoQuanLy, rdoNhanVien, rdoHoatDong, rdoNghi;
     private JTable table;
     private JDateChooser dateNgaySinh, dateNgayTao;
-    NhanVien_DAO dsnv = new NhanVien_DAO();
-	private DefaultTableModel dl;
+    private JButton btnThem, btnSua, btnXoaRong;
+    private DefaultTableModel modelNV;
+
+    private NhanVien_DAO nvDAO = new NhanVien_DAO();
 
     public NhanVien_GUI() {
         setLayout(new BorderLayout(10, 10));
         setBackground(Color.WHITE);
 
-        // ==== TITLE ====
+        // ===== TIÊU ĐỀ =====
         JLabel lblTitle = new JLabel("QUẢN LÝ NHÂN VIÊN", SwingConstants.CENTER);
         lblTitle.setFont(new Font("Tahoma", Font.BOLD, 26));
         lblTitle.setForeground(new Color(30, 60, 114));
         add(lblTitle, BorderLayout.NORTH);
 
-        // ==== THÔNG TIN NHÂN VIÊN ====
+        // ===== KHỞI TẠO GIAO DIỆN =====
+        initForm();
+
+        // ===== KẾT NỐI SQL & LOAD DỮ LIỆU =====
+        try {
+            ConnectDB.getInstance().connect();
+            loadNhanVienToTable();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Không thể kết nối CSDL: " + e.getMessage());
+        }
+    }
+
+    private void initForm() {
         JPanel infoPanel = new JPanel(new BorderLayout(10, 10));
         infoPanel.setBorder(new TitledBorder("Thông tin nhân viên"));
         infoPanel.setBackground(Color.WHITE);
         add(infoPanel, BorderLayout.NORTH);
 
-        // === FORM BÊN TRÁI ===
         JPanel formPanel = new JPanel(new GridLayout(5, 4, 10, 10));
         formPanel.setBackground(Color.WHITE);
 
         // Hàng 1
         formPanel.add(new JLabel("Mã nhân viên:"));
         txtMaNV = new JTextField();
-        txtMaNV.setEditable(false);
         formPanel.add(txtMaNV);
 
         formPanel.add(new JLabel("Họ tên:"));
         txtHoTen = new JTextField();
         formPanel.add(txtHoTen);
 
-        // Hàng 2 - Giới tính
+        // Hàng 2
         formPanel.add(new JLabel("Giới tính:"));
-        JPanel gioiTinhPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        JPanel gtPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         rdoNam = new JRadioButton("Nam");
         rdoNu = new JRadioButton("Nữ");
-        ButtonGroup groupGT = new ButtonGroup();
-        groupGT.add(rdoNam);
-        groupGT.add(rdoNu);
-        gioiTinhPanel.add(rdoNam);
-        gioiTinhPanel.add(rdoNu);
-        gioiTinhPanel.setBackground(Color.WHITE);
-        formPanel.add(gioiTinhPanel);
-
-        // Mặc định chọn Nữ
+        ButtonGroup gtGroup = new ButtonGroup();
+        gtGroup.add(rdoNam);
+        gtGroup.add(rdoNu);
+        gtPanel.add(rdoNam);
+        gtPanel.add(rdoNu);
+        gtPanel.setBackground(Color.WHITE);
         rdoNu.setSelected(true);
+        formPanel.add(gtPanel);
 
         formPanel.add(new JLabel("Ngày sinh:"));
         dateNgaySinh = new JDateChooser();
@@ -83,139 +94,212 @@ public class NhanVien_GUI extends JPanel implements ActionListener, MouseListene
         txtEmail = new JTextField();
         formPanel.add(txtEmail);
 
-        // Hàng 4 - Chức vụ
+        // Hàng 4
         formPanel.add(new JLabel("Chức vụ:"));
-        JPanel chucVuPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        JPanel cvPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         rdoQuanLy = new JRadioButton("Quản lý");
         rdoNhanVien = new JRadioButton("Nhân viên");
-        ButtonGroup groupCV = new ButtonGroup();
-        groupCV.add(rdoQuanLy);
-        groupCV.add(rdoNhanVien);
-        chucVuPanel.add(rdoQuanLy);
-        chucVuPanel.add(rdoNhanVien);
-        chucVuPanel.setBackground(Color.WHITE);
-        formPanel.add(chucVuPanel);
-
-        // Mặc định chọn Nhân viên
+        ButtonGroup cvGroup = new ButtonGroup();
+        cvGroup.add(rdoQuanLy);
+        cvGroup.add(rdoNhanVien);
+        cvPanel.add(rdoQuanLy);
+        cvPanel.add(rdoNhanVien);
+        cvPanel.setBackground(Color.WHITE);
         rdoNhanVien.setSelected(true);
+        formPanel.add(cvPanel);
 
         formPanel.add(new JLabel("Ngày tạo:"));
         dateNgayTao = new JDateChooser();
         dateNgayTao.setDateFormatString("dd/MM/yyyy");
-        dateNgayTao.setDate(new Date()); // mặc định ngày hiện tại
+        dateNgayTao.setDate(new Date());
         formPanel.add(dateNgayTao);
 
-        // Hàng 5 - Trạng thái
+        // Hàng 5
         formPanel.add(new JLabel("Trạng thái:"));
-        JPanel trangThaiPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        JPanel ttPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         rdoHoatDong = new JRadioButton("Đang làm");
         rdoNghi = new JRadioButton("Nghỉ");
-        ButtonGroup groupTT = new ButtonGroup();
-        groupTT.add(rdoHoatDong);
-        groupTT.add(rdoNghi);
-        trangThaiPanel.add(rdoHoatDong);
-        trangThaiPanel.add(rdoNghi);
-        trangThaiPanel.setBackground(Color.WHITE);
-        formPanel.add(trangThaiPanel);
-
-        // Mặc định chọn Đang làm
+        ButtonGroup ttGroup = new ButtonGroup();
+        ttGroup.add(rdoHoatDong);
+        ttGroup.add(rdoNghi);
+        ttPanel.add(rdoHoatDong);
+        ttPanel.add(rdoNghi);
+        ttPanel.setBackground(Color.WHITE);
         rdoHoatDong.setSelected(true);
-
-        // Cột trống để căn đều
+        formPanel.add(ttPanel);
         formPanel.add(new JLabel(""));
         formPanel.add(new JLabel(""));
 
         infoPanel.add(formPanel, BorderLayout.CENTER);
 
-        // === CỘT NÚT BÊN PHẢI ===
-        JPanel buttonColumn = new JPanel();
-        buttonColumn.setLayout(new BoxLayout(buttonColumn, BoxLayout.Y_AXIS));
-        buttonColumn.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        buttonColumn.setBackground(Color.WHITE);
+        // Cột nút
+        JPanel buttonCol = new JPanel();
+        buttonCol.setLayout(new BoxLayout(buttonCol, BoxLayout.Y_AXIS));
+        buttonCol.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        buttonCol.setBackground(Color.WHITE);
 
-        JButton btnThem = new JButton("Thêm");
-        JButton btnSua = new JButton("Lưu");
-        JButton btnXoaRong = new JButton("Xóa Rỗng");
+        btnThem = new JButton("Thêm");
+        btnSua = new JButton("Lưu");
+        btnXoaRong = new JButton("Xóa Rỗng");
 
         Dimension btnSize = new Dimension(120, 35);
+
         for (JButton btn : new JButton[]{btnThem, btnSua, btnXoaRong}) {
+            btn.setFont(new Font("Tahoma", Font.PLAIN, 14));
+            btn.setBackground(new Color(220, 230, 250));
             btn.setAlignmentX(Component.CENTER_ALIGNMENT);
-            btn.setMaximumSize(btnSize);
             btn.setPreferredSize(btnSize);
-            btnColumnStyle(btn);
-            buttonColumn.add(btn);
-            buttonColumn.add(Box.createVerticalStrut(10));
+            btn.setMaximumSize(btnSize);
+            btn.setMinimumSize(btnSize); // (optional) để chắc chắn layout không co lại
+            buttonCol.add(btn);
+            buttonCol.add(Box.createVerticalStrut(10));
+            btn.addActionListener(this);
         }
+//        for (JButton btn : new JButton[]{btnThem, btnSua, btnXoaRong}) {
+//            btn.setFont(new Font("Tahoma", Font.PLAIN, 14));
+//            btn.setBackground(new Color(220, 230, 250));
+//            btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+//            buttonCol.add(btn);
+//            buttonCol.add(Box.createVerticalStrut(10));
+//            btn.addActionListener(this);
+//        }
 
-        infoPanel.add(buttonColumn, BorderLayout.EAST);
+        infoPanel.add(buttonCol, BorderLayout.EAST);
 
-        // ==== BẢNG DỮ LIỆU ====
-        JPanel tablePanel = new JPanel(new BorderLayout());
-        JLabel lblDS = new JLabel("Danh sách nhân viên");
-        lblDS.setFont(new Font("Tahoma", Font.BOLD, 18));
-        lblDS.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        tablePanel.add(lblDS, BorderLayout.NORTH);
-
-        String[] columns = {"STT", "Mã NV", "Họ Tên", "Giới Tính", "Ngày Sinh", "SĐT", "Email", "Chức Vụ", "Ngày Tạo", "Trạng Thái"};
-        Object[][] data = {};
-        table = new JTable(data, columns);
-        JScrollPane scrollPane = new JScrollPane(table);
-        tablePanel.add(scrollPane, BorderLayout.CENTER);
-
-        add(tablePanel, BorderLayout.CENTER);
+        // Bảng dữ liệu
+        String[] cols = {"STT", "Mã NV", "Họ Tên", "Giới Tính", "Ngày Sinh", "SĐT", "Email", "Chức Vụ", "Ngày Tạo", "Trạng Thái"};
+        modelNV = new DefaultTableModel(cols, 0);
+        table = new JTable(modelNV);
+        table.addMouseListener(this);
+        add(new JScrollPane(table), BorderLayout.CENTER);
     }
 
-    private void btnColumnStyle(JButton btn) {
-        btn.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        btn.setBackground(new Color(220, 230, 250));
-        btn.setFocusPainted(false);
-        btn.setBorder(BorderFactory.createLineBorder(new Color(150, 150, 200)));
+    private void loadNhanVienToTable() {
+        modelNV.setRowCount(0);
+        ArrayList<NhanVien> list = (ArrayList<NhanVien>) nvDAO.docTuBang();
+        int stt = 1;
+        for (NhanVien nv : list) {
+            modelNV.addRow(new Object[]{
+                    stt++,
+                    nv.getMaNhanVien(),
+                    nv.getHoten(),
+                    nv.isGioiTinh() ? "Nam" : "Nữ",
+                    nv.getNgaySinh(),
+                    nv.getSoDienThoai(),
+                    nv.getEmail(),
+                    nv.isChucVu() ? "Quản lý" : "Nhân viên",
+                    nv.getThoiGianTao(),
+                    nv.isTrangThai() ? "Đang làm" : "Nghỉ"
+            });
+        }
     }
 
-    // Test panel độc lập
+    private void clearForm() {
+        txtMaNV.setText("");
+        txtHoTen.setText("");
+        txtSoDT.setText("");
+        txtEmail.setText("");
+        rdoNu.setSelected(true);
+        rdoNhanVien.setSelected(true);
+        rdoHoatDong.setSelected(true);
+        dateNgaySinh.setDate(null);
+        dateNgayTao.setDate(new Date());
+    }
+
+    private NhanVien getFormData() {
+        try {
+            String ma = txtMaNV.getText().trim();
+            String ten = txtHoTen.getText().trim();
+            String sdt = txtSoDT.getText().trim();
+            String email = txtEmail.getText().trim();
+            boolean gt = rdoNam.isSelected();
+            boolean cv = rdoQuanLy.isSelected();
+            boolean tt = rdoHoatDong.isSelected();
+
+            LocalDate ngaySinh = null, ngayTao = null;
+            if (dateNgaySinh.getDate() != null)
+                ngaySinh = new java.sql.Date(dateNgaySinh.getDate().getTime()).toLocalDate();
+            if (dateNgayTao.getDate() != null)
+                ngayTao = new java.sql.Date(dateNgayTao.getDate().getTime()).toLocalDate();
+
+            return new NhanVien(ma, ten, sdt, email, cv, ngayTao, tt, gt, ngaySinh);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Lỗi đọc dữ liệu từ form!");
+            return null;
+        }
+    }
+
+    // ===== XỬ LÝ SỰ KIỆN =====
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        Object o = e.getSource();
+        if (o.equals(btnThem)) {
+            NhanVien nv = getFormData();
+            if (nv != null) {
+                if (nvDAO.create(nv)) {
+                    JOptionPane.showMessageDialog(this, "Thêm nhân viên thành công!");
+                    loadNhanVienToTable();
+                    clearForm();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Thêm thất bại!");
+                }
+            }
+        } else if (o.equals(btnSua)) {
+            NhanVien nv = getFormData();
+            if (nv != null) {
+                if (nvDAO.update(nv)) {
+                    JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
+                    loadNhanVienToTable();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Cập nhật thất bại!");
+                }
+            }
+        } else if (o.equals(btnXoaRong)) {
+            clearForm();
+        }
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        int row = table.getSelectedRow();
+        if (row >= 0) {
+            txtMaNV.setText(modelNV.getValueAt(row, 1).toString());
+            txtHoTen.setText(modelNV.getValueAt(row, 2).toString());
+            String gt = modelNV.getValueAt(row, 3).toString();
+            rdoNam.setSelected(gt.equalsIgnoreCase("Nam"));
+            rdoNu.setSelected(gt.equalsIgnoreCase("Nữ"));
+
+            Object ns = modelNV.getValueAt(row, 4);
+            if (ns != null) dateNgaySinh.setDate(java.sql.Date.valueOf(ns.toString()));
+
+            txtSoDT.setText(modelNV.getValueAt(row, 5).toString());
+            txtEmail.setText(modelNV.getValueAt(row, 6).toString());
+            String cv = modelNV.getValueAt(row, 7).toString();
+            rdoQuanLy.setSelected(cv.equalsIgnoreCase("Quản lý"));
+            rdoNhanVien.setSelected(cv.equalsIgnoreCase("Nhân viên"));
+
+            Object nt = modelNV.getValueAt(row, 8);
+            if (nt != null) dateNgayTao.setDate(java.sql.Date.valueOf(nt.toString()));
+
+            String tt = modelNV.getValueAt(row, 9).toString();
+            rdoHoatDong.setSelected(tt.equalsIgnoreCase("Đang làm"));
+            rdoNghi.setSelected(tt.equalsIgnoreCase("Nghỉ"));
+        }
+    }
+
+    @Override public void mousePressed(MouseEvent e) {}
+    @Override public void mouseReleased(MouseEvent e) {}
+    @Override public void mouseEntered(MouseEvent e) {}
+    @Override public void mouseExited(MouseEvent e) {}
+
+    // ===== CHẠY THỬ =====
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            JFrame testFrame = new JFrame("Test Panel NhanVien");
-            testFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            testFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-            testFrame.add(new NhanVien_GUI());
-            testFrame.setVisible(true);
+            JFrame f = new JFrame("Quản Lý Nhân Viên");
+            f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            f.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            f.add(new NhanVien_GUI());
+            f.setVisible(true);
         });
     }
-
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
 }
