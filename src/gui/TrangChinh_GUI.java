@@ -21,7 +21,7 @@ public class TrangChinh_GUI extends JFrame implements ActionListener {
         setSize(1300, 800);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
-
+        
         Color mauXanhDam = new Color(30, 61, 89);
         Color mauVangDong = new Color(212, 175, 55);
         Color mauNen = new Color(249, 249, 249);
