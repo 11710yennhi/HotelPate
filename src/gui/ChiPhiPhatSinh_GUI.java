@@ -1,51 +1,39 @@
 package gui;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 
-public class ChiPhiPhatSinh_GUI {
+public class ChiPhiPhatSinh_GUI extends JPanel implements ActionListener, MouseListener {
 
-    private JFrame frame;
     private JTextField txtMaCP, txtGia, txtTenCP;
     private JTable table;
     private JComboBox<String> cboLoai;
-
-    public static void main(String[] args) {
-        EventQueue.invokeLater(() -> {
-            try {
-                ChiPhiPhatSinh_GUI window = new ChiPhiPhatSinh_GUI();
-                window.frame.setVisible(true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
 
     public ChiPhiPhatSinh_GUI() {
         initialize();
     }
 
     private void initialize() {
-        frame = new JFrame("Chi Phí Phát Sinh");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-
-        // ==== MAIN PANEL ====
-        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBackground(Color.WHITE);
-        frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
+        setLayout(new BorderLayout(10, 10));
+        setBackground(Color.WHITE);
 
         // ==== TITLE ====
         JLabel lblTitle = new JLabel("CHI PHÍ PHÁT SINH", SwingConstants.CENTER);
         lblTitle.setFont(new Font("Tahoma", Font.BOLD, 26));
         lblTitle.setForeground(new Color(30, 60, 114));
-        mainPanel.add(lblTitle, BorderLayout.NORTH);
+        add(lblTitle, BorderLayout.NORTH);
 
         // ==== PANEL THÔNG TIN ====
         JPanel infoPanel = new JPanel(new BorderLayout(10, 10));
         infoPanel.setBorder(new TitledBorder("Thông tin chi phí phát sinh"));
-        mainPanel.add(infoPanel, BorderLayout.NORTH);
+        infoPanel.setBackground(Color.WHITE);
+        add(infoPanel, BorderLayout.NORTH);
 
         // ==== FORM ====
         JPanel formPanel = new JPanel(new GridLayout(2, 1, 10, 10));
@@ -55,7 +43,6 @@ public class ChiPhiPhatSinh_GUI {
         JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 30));
         JLabel lblMa = new JLabel("Mã chi phí phát sinh: ");
         txtMaCP = new JTextField(40);
-        txtMaCP.setEditable(false);
         JLabel lblGia = new JLabel("Giá:              ");
         txtGia = new JTextField(40);
         row1.add(lblMa);
@@ -84,7 +71,7 @@ public class ChiPhiPhatSinh_GUI {
         // ==== CỘT NÚT BÊN PHẢI ====
         JPanel buttonColumn = new JPanel();
         buttonColumn.setLayout(new BoxLayout(buttonColumn, BoxLayout.Y_AXIS));
-        buttonColumn.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        buttonColumn.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 100));
         buttonColumn.setBackground(Color.WHITE);
 
         JButton btnThem = new JButton("Thêm");
@@ -105,18 +92,19 @@ public class ChiPhiPhatSinh_GUI {
 
         // ==== BẢNG DỮ LIỆU ====
         JPanel tablePanel = new JPanel(new BorderLayout());
-        JLabel lblDS = new JLabel("Danh sách chi phí phát sinh");
+        tablePanel.setBackground(Color.WHITE);
+        JLabel lblDS = new JLabel("Danh sách chi phí phát sinh", SwingConstants.CENTER);
         lblDS.setFont(new Font("Tahoma", Font.BOLD, 18));
         lblDS.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         tablePanel.add(lblDS, BorderLayout.NORTH);
 
-        String[] columns = {"STT", "Mã Chi Phí Phát Sinh", "Tên Chi Phí Phát Sinh", "Giá ", "Loại Chi Phí"};
+        String[] columns = {"STT", "Mã Chi Phí Phát Sinh", "Tên Chi Phí Phát Sinh", "Giá", "Loại Chi Phí"};
         Object[][] data = {};
         table = new JTable(data, columns);
         JScrollPane scrollPane = new JScrollPane(table);
         tablePanel.add(scrollPane, BorderLayout.CENTER);
 
-        mainPanel.add(tablePanel, BorderLayout.CENTER);
+        add(tablePanel, BorderLayout.CENTER);
     }
 
     private void btnColumnStyle(JButton btn) {
@@ -125,4 +113,51 @@ public class ChiPhiPhatSinh_GUI {
         btn.setFocusPainted(false);
         btn.setBorder(BorderFactory.createLineBorder(new Color(150, 150, 200)));
     }
+
+    // ==== Test panel độc lập ====
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Test Panel Chi Phí Phát Sinh");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            frame.add(new ChiPhiPhatSinh_GUI());
+            frame.setVisible(true);
+        });
+    }
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
 }
