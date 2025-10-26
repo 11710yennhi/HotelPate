@@ -45,7 +45,7 @@ public class LoaiPhong_GUI extends JPanel implements ActionListener, MouseListen
         Dimension lblSize = new Dimension(120, 25);
         Dimension txtSize = new Dimension(250, 25);
 
-        int horizontalGap = 70;
+        int horizontalGap = 50;
         int verticalGap = 10;
 
         // HÀNG 1: Mã loại phòng + Sức chứa
@@ -54,12 +54,12 @@ public class LoaiPhong_GUI extends JPanel implements ActionListener, MouseListen
 
         JLabel lblMa = new JLabel("Mã loại phòng:");
         lblMa.setPreferredSize(lblSize);
-        txtMaLoai = new JTextField(40);
+        txtMaLoai = new JTextField(20);
         txtMaLoai.setPreferredSize(txtSize);
 
         JLabel lblSucChua = new JLabel("Sức chứa:");
         lblSucChua.setPreferredSize(lblSize);
-        txtSucChua = new JTextField(40);
+        txtSucChua = new JTextField(20);
         txtSucChua.setPreferredSize(txtSize);
 
         row1.add(lblMa);
@@ -74,12 +74,12 @@ public class LoaiPhong_GUI extends JPanel implements ActionListener, MouseListen
 
         JLabel lblTen = new JLabel("Tên loại phòng:");
         lblTen.setPreferredSize(lblSize);
-        txtTenLoai = new JTextField(40);
+        txtTenLoai = new JTextField(20);
         txtTenLoai.setPreferredSize(txtSize);
 
         JLabel lblMoTa = new JLabel("Mô tả:");
         lblMoTa.setPreferredSize(lblSize);
-        txtMoTa = new JTextField(40);
+        txtMoTa = new JTextField(20);
         txtMoTa.setPreferredSize(txtSize);
 
         row2.add(lblTen);
@@ -94,7 +94,7 @@ public class LoaiPhong_GUI extends JPanel implements ActionListener, MouseListen
 
         JLabel lblGia = new JLabel("Giá:");
         lblGia.setPreferredSize(lblSize);
-        txtGia = new JTextField(40);
+        txtGia = new JTextField(20);
         txtGia.setPreferredSize(txtSize);
 
         row3.add(lblGia);
