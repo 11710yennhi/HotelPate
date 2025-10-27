@@ -21,7 +21,10 @@ public class PhieuDatPhong {
     private List<ChiTietChiPhiPhatSinh> dsChiPhiPhatSinh;
 
     public PhieuDatPhong() {
+        this.dsChiTiet = new ArrayList<>();
+        this.dsChiPhiPhatSinh = new ArrayList<>();
     }
+
 
     public PhieuDatPhong(String maPhieuDatPhong) {
         this.maPhieuDatPhong = maPhieuDatPhong;
@@ -115,7 +118,8 @@ public class PhieuDatPhong {
         
         if (dsChiTiet != null) {
             for (ChiTietPhieuDatPhong ct : dsChiTiet) {
-                tongTienPhong += ct.getPhong().getLoaiPhong().getGia();
+                tongTienPhong += ct.getThanhTien();
+                
             }
         }
 

@@ -1,9 +1,8 @@
 ﻿--DROP DATABASE QLKS
 
 CREATE DATABASE QLKS
-Go
 USE QLKS
-Go
+
 CREATE TABLE NhanVien (
     maNhanVien VARCHAR(13) PRIMARY KEY,
     hoTen NVARCHAR(50) NOT NULL,
@@ -38,7 +37,7 @@ CREATE TABLE KhuyenMai (
     loaiKhuyenMai NVARCHAR(50) NOT NULL,
     dieuKien FLOAT NOT NULL CHECK (dieuKien >= 0),
     giaTriGiam FLOAT NOT NULL CHECK (giaTriGiam > 0),
-	
+	CONSTRAINT CK_KhuyenMai_NgayHopLe CHECK (ngayKetThuc >= ngayBatDau)
 )
 
 CREATE TABLE LoaiPhong (
@@ -64,7 +63,7 @@ CREATE TABLE PhieuDatPhong (
     trangThai NVARCHAR(50),
     FOREIGN KEY (maKhachHang) REFERENCES KhachHang(maKhachHang),
     FOREIGN KEY (maNhanVien) REFERENCES NhanVien(maNhanVien),
-	
+	CONSTRAINT CK_PDP_NgayTraPhong CHECK (ngayTraPhong >= ngayNhanPhong)
 )
 
 CREATE TABLE ChiTietPhieuDatPhong (

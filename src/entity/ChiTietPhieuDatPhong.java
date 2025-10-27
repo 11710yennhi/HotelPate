@@ -11,6 +11,7 @@ public class ChiTietPhieuDatPhong {
     private LocalDate ngayTraThuc;
     private String trangThai;
 
+    
     public ChiTietPhieuDatPhong() {
     }
 

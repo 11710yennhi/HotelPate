@@ -3,49 +3,69 @@ package entity;
 import java.util.Objects;
 
 public class Phong {
-	private String maLoaiPhong;
+	private String maPhong;
 	private LoaiPhong loaiPhong;
-
-	public Phong(String maLoaiPhong, LoaiPhong loaiPhong) {
+	private String trangThai;
+	public Phong(String maPhong, LoaiPhong loaiPhong, String trangThai) {
 		super();
-		this.maLoaiPhong = maLoaiPhong;
+		this.maPhong = maPhong;
 		this.loaiPhong = loaiPhong;
+		this.trangThai = trangThai;
 	}
-
-	public Phong(String maLoaiPhong) {
-		super();
-		this.maLoaiPhong = maLoaiPhong;
-	}
-
+	
+	
 	public Phong() {
 		super();
 	}
 
-	public String getMaLoaiPhong() {
-		return maLoaiPhong;
+
+	public Phong(String maPhong) {
+		super();
+		this.maPhong = maPhong;
 	}
 
-	public void setMaLoaiPhong(String maLoaiPhong) {
-		this.maLoaiPhong = maLoaiPhong;
+
+	public String getMaPhong() {
+		return maPhong;
 	}
+
+
+	public void setMaPhong(String maPhong) {
+		this.maPhong = maPhong;
+	}
+
 
 	public LoaiPhong getLoaiPhong() {
 		return loaiPhong;
 	}
 
+
 	public void setLoaiPhong(LoaiPhong loaiPhong) {
 		this.loaiPhong = loaiPhong;
 	}
 
+
+	public String getTrangThai() {
+		return trangThai;
+	}
+
+
+	public void setTrangThai(String trangThai) {
+		this.trangThai = trangThai;
+	}
+
+
 	@Override
 	public String toString() {
-		return "Phong [maLoaiPhong=" + maLoaiPhong + ", loaiPhong=" + loaiPhong + "]";
+		return "Phong [maPhong=" + maPhong + ", loaiPhong=" + loaiPhong + ", trangThai=" + trangThai + "]";
 	}
+
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(maLoaiPhong);
+		return Objects.hash(maPhong);
 	}
+
 
 	@Override
 	public boolean equals(Object obj) {
@@ -56,7 +76,7 @@ public class Phong {
 		if (getClass() != obj.getClass())
 			return false;
 		Phong other = (Phong) obj;
-		return Objects.equals(maLoaiPhong, other.maLoaiPhong);
+		return Objects.equals(maPhong, other.maPhong);
 	}
 
 }

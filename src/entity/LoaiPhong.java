@@ -5,76 +5,87 @@ import java.util.Objects;
 public class LoaiPhong {
 	private String maLoaiPhong;
 	private String tenLoaiPhong;
-	private int suaChua;
+	private int sucChua;
 	private double gia;
 	private String moTa;
-
+	
+	
 	public LoaiPhong() {
-
+		
 	}
+
 
 	public LoaiPhong(String maLoaiPhong) {
+		super();
 		this.maLoaiPhong = maLoaiPhong;
 	}
 
-	public LoaiPhong(String maLoaiPhong, String tenLoaiPhong, int suaChua, double gia, String moTa) {
+
+	public LoaiPhong(String maLoaiPhong, String tenLoaiPhong, int sucChua, double gia, String moTa) {
+		super();
 		this.maLoaiPhong = maLoaiPhong;
 		this.tenLoaiPhong = tenLoaiPhong;
-		this.suaChua = suaChua;
+		this.sucChua = sucChua;
 		this.gia = gia;
 		this.moTa = moTa;
 	}
+
 
 	public String getMaLoaiPhong() {
 		return maLoaiPhong;
 	}
 
+
 	public void setMaLoaiPhong(String maLoaiPhong) {
 		this.maLoaiPhong = maLoaiPhong;
 	}
+
 
 	public String getTenLoaiPhong() {
 		return tenLoaiPhong;
 	}
 
+
 	public void setTenLoaiPhong(String tenLoaiPhong) {
 		this.tenLoaiPhong = tenLoaiPhong;
 	}
 
-	public int getSuaChua() {
-		return suaChua;
+
+	public int getSucChua() {
+		return sucChua;
 	}
 
-	public void setSuaChua(int suaChua) {
-		this.suaChua = suaChua;
+
+	public void setSucChua(int sucChua) {
+		this.sucChua = sucChua;
 	}
+
 
 	public double getGia() {
 		return gia;
 	}
 
+
 	public void setGia(double gia) {
 		this.gia = gia;
 	}
+
 
 	public String getMoTa() {
 		return moTa;
 	}
 
+
 	public void setMoTa(String moTa) {
 		this.moTa = moTa;
 	}
 
-	@Override
-	public String toString() {
-		return "LoaiPhong [maLoaiPhong=" + maLoaiPhong + ", tenLoaiPhong=" + tenLoaiPhong + ", suaChua=" + suaChua
-				+ ", gia=" + gia + ", moTa=" + moTa + "]";
-	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(maLoaiPhong);
 	}
+
 
 	@Override
 	public boolean equals(Object obj) {
@@ -88,4 +99,12 @@ public class LoaiPhong {
 		return Objects.equals(maLoaiPhong, other.maLoaiPhong);
 	}
 
+
+	@Override
+	public String toString() {
+		return "LoaiPhong [maLoaiPhong=" + maLoaiPhong + ", tenLoaiPhong=" + tenLoaiPhong + ", sucChua=" + sucChua
+				+ ", gia=" + gia + ", moTa=" + moTa + "]";
+	}
+
+	
 }
