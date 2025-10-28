@@ -72,10 +72,20 @@ public class ChiTietPhieuDatPhong {
             return 0;
         }
 
-        long soNgay = ChronoUnit.DAYS.between(ngayNhanThuc, ngayTraThuc);
-        if (soNgay <= 0) soNgay = 1; // Tối thiểu 1 ngày
+        return phong.getLoaiPhong().getGia() * getSoNgay();
+    }
 
-        return phong.getLoaiPhong().getGia() * soNgay;
+    public int getSoNgay() {
+        if (ngayNhanThuc == null || ngayTraThuc == null) {
+            return 0;
+        }
+
+        long soNgay = ChronoUnit.DAYS.between(ngayNhanThuc, ngayTraThuc);
+        if (soNgay <= 0) {
+            soNgay = 1; // Tối thiểu 1 ngày
+        }
+
+        return (int) soNgay;
     }
 
 
