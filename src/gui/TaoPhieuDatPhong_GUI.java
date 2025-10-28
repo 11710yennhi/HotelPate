@@ -514,7 +514,7 @@ public class TaoPhieuDatPhong_GUI extends JPanel implements ActionListener, Mous
                     );
                     dsctpdp.themChiTietPhieuDatPhong(ctMoi);
                 }
-
+                new InPhieuDatPhong_GUI(phieuMoi);
                 JOptionPane.showMessageDialog(null, "Đã thêm phiếu đặt phòng và chi tiết mới!");
             }
         }
@@ -539,6 +539,100 @@ public class TaoPhieuDatPhong_GUI extends JPanel implements ActionListener, Mous
         }
     
 
+    								//in phiếu đặt phòng
+    
+    
+    public class InPhieuDatPhong_GUI extends JFrame {
+
+        public InPhieuDatPhong_GUI(PhieuDatPhong phieu) {
+            setTitle("Phiếu đặt phòng");
+            setSize(800, 700);
+            setLocationRelativeTo(null);
+            setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+            // Panel chính
+            JPanel mainPanel = new JPanel();
+            mainPanel.setLayout(new BorderLayout(0, 10));
+            mainPanel.setBorder(new EmptyBorder(20, 30, 20, 30));
+            add(mainPanel);
+
+            // ===== PHẦN TIÊU ĐỀ =====
+            JLabel lblTitle = new JLabel("PHIẾU XÁC NHẬN ĐẶT PHÒNG " + phieu.getMaPhieuDatPhong(), SwingConstants.CENTER);
+            lblTitle.setFont(new Font("Serif", Font.BOLD, 20));
+            mainPanel.add(lblTitle, BorderLayout.NORTH);
+
+            // ===== PHẦN NỘI DUNG CHÍNH =====
+            JPanel centerPanel = new JPanel();
+            centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+            mainPanel.add(centerPanel, BorderLayout.CENTER);
+
+            // --- Thông tin khách sạn (nằm bên phải) ---
+            JLabel lblHotel = new JLabel("Khách sạn Pate", SwingConstants.RIGHT);
+            lblHotel.setFont(new Font("SansSerif", Font.ITALIC, 14));
+            lblHotel.setAlignmentX(Component.RIGHT_ALIGNMENT);
+            centerPanel.add(lblHotel);
+            centerPanel.add(Box.createVerticalStrut(10));
+
+            // --- Thông tin khách hàng ---
+            KhachHang kh = khd.getKhachHangTheoMa(phieu.getKhachHang().getMaKhachHang());
+            JPanel infoPanel = new JPanel(new GridLayout(4, 1, 5, 5)); // thêm 1 dòng
+            infoPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            infoPanel.add(new JLabel("Mã khách hàng: " + kh.getMaKhachHang()));
+            infoPanel.add(new JLabel("Họ tên khách hàng: " + kh.getHoTen()));
+            infoPanel.add(new JLabel("Số điện thoại: " + kh.getSoDienThoai()));
+            infoPanel.add(new JLabel("Quốc tịch Việt Nam : "+ kh.LaNguoiVietNam()));
+            centerPanel.add(infoPanel);
+            centerPanel.add(Box.createVerticalStrut(15));
+
+            // --- Bảng chi tiết phòng ---
+            String[] columns = {"STT", "Mã phòng", "Loại phòng", "Ngày nhận", "Ngày trả", "Số đêm", "Giá", "Thành tiền"};
+            DefaultTableModel model = new DefaultTableModel(columns, 0);
+            JTable table = new JTable(model);
+            table.setRowHeight(25);
+
+            // Giả sử bạn có danh sách phòng từ phiếu đặt phòng
+            List<ChiTietPhieuDatPhong> danhSachCTPDP= dsctpdp.getChiTietTheoMaPhieu(phieu.getMaPhieuDatPhong());
+            int stt = 1;
+            for (ChiTietPhieuDatPhong p : danhSachCTPDP) {
+                PhieuDatPhong pdpp = doiTuongTongTienPhong();
+                String tongTienPhong = String.format("%,.0f VNĐ", phieu.getTongTienPhong());
+
+                Object[] row = {
+                    stt++,
+                    p.getPhong().getMaPhong(),
+                    p.getPhong().getLoaiPhong().getTenLoaiPhong(),
+                    p.getNgayNhanThuc(),
+                    p.getNgayTraThuc(),
+                    p.getSoNgay(),
+                    String.format("%,.0f", p.getPhong().getLoaiPhong().getGia()),
+                    pdpp.getTongTienPhong()
+                };
+                model.addRow(row);
+            }
+
+
+            JScrollPane scroll = new JScrollPane(table);
+            centerPanel.add(scroll);
+            centerPanel.add(Box.createVerticalStrut(15));
+
+            // --- Tổng tiền và ghi chú ---
+            JPanel bottomPanel = new JPanel();
+            bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));
+            bottomPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            bottomPanel.add(new JLabel("Tổng tiền phòng: " + String.format("%,.0f VNĐ", phieu.getTongTienPhong())));
+            bottomPanel.add(new JLabel("Tiền cọc: " + String.format("%,.0f VNĐ", phieu.getTienCoc())));
+            bottomPanel.add(new JLabel("Ghi chú: ......................................................"));
+            bottomPanel.add(new JLabel("......................................................................"));
+            centerPanel.add(bottomPanel);
+
+            setVisible(true);
+        }
+    }
+
+    
+    
+    
     // ========================== KIỂM TRA DỮ LIỆU NHẬP ==========================
     public boolean kiemTraDuLieuNhap() {
         if (dlp.getRowCount()==0) {
