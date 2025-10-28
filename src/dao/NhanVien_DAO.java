@@ -1,8 +1,9 @@
-package dao;
+	package dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Date;
 import java.time.LocalDate;
@@ -48,27 +49,65 @@ public class NhanVien_DAO {
     }
 
     // Lấy nhân viên theo mã
-    public NhanVien getNhanVienTheoMa(String maNV) {
+//    public NhanVien getNhanVienTheoMa(String maNV) {
+//        NhanVien nv = null;
+//        try {
+//            Connection con = ConnectDB.getInstance().getConnection();
+//            String sql = "SELECT * FROM NhanVien WHERE maNhanVien = ?";
+//            PreparedStatement stmt = con.prepareStatement(sql);
+//            stmt.setString(1, maNV);
+//            ResultSet rs = stmt.executeQuery();
+//            if (rs.next()) {
+//                String hoTen = rs.getString("hoTen");
+//                boolean gioiTinh = rs.getBoolean("gioiTinh");
+//                LocalDate ngaySinh = rs.getDate("ngaySinh") != null ? rs.getDate("ngaySinh").toLocalDate() : null;
+//                String soDienThoai = rs.getString("soDienThoai");
+//                String email = rs.getString("email");
+//                boolean chucVu = rs.getBoolean("chucVu");
+//                LocalDate ngayTao = rs.getDate("ngayTao") != null ? rs.getDate("ngayTao").toLocalDate() : null;
+//                boolean trangThai = rs.getBoolean("trangThai");
+//
+//                nv = new NhanVien(maNV, hoTen, soDienThoai, email, chucVu, ngayTao, trangThai, gioiTinh, ngaySinh);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return nv;
+//    }
+    
+    public NhanVien getNhanVienTheoMa(String maNhanVien) {
+        String query = "SELECT * FROM NhanVien WHERE maNhanVien = ?";
         NhanVien nv = null;
-        try {
-            Connection con = ConnectDB.getInstance().getConnection();
-            String sql = "SELECT * FROM NhanVien WHERE maNhanVien = ?";
-            PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, maNV);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                String hoTen = rs.getString("hoTen");
-                boolean gioiTinh = rs.getBoolean("gioiTinh");
-                LocalDate ngaySinh = rs.getDate("ngaySinh") != null ? rs.getDate("ngaySinh").toLocalDate() : null;
-                String soDienThoai = rs.getString("soDienThoai");
-                String email = rs.getString("email");
-                boolean chucVu = rs.getBoolean("chucVu");
-                LocalDate ngayTao = rs.getDate("ngayTao") != null ? rs.getDate("ngayTao").toLocalDate() : null;
-                boolean trangThai = rs.getBoolean("trangThai");
 
-                nv = new NhanVien(maNV, hoTen, soDienThoai, email, chucVu, ngayTao, trangThai, gioiTinh, ngaySinh);
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement ps = con.prepareStatement(query)) {
+
+            ps.setString(1, maNhanVien);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                nv = new NhanVien();
+                nv.setMaNhanVien(rs.getString("maNhanVien"));
+                nv.setHoten(rs.getString("hoTen"));
+                nv.setGioiTinh(rs.getBoolean("gioiTinh"));
+                
+                // Nếu cột ngày sinh có dữ liệu thì mới chuyển đổi sang LocalDate
+                Date ngaySinh = rs.getDate("ngaySinh");
+                if (ngaySinh != null)
+                    nv.setNgaySinh(ngaySinh.toLocalDate());
+
+                nv.setSoDienThoai(rs.getString("soDienThoai"));
+                nv.setEmail(rs.getString("email"));
+                nv.setChucVu(rs.getBoolean("chucVu"));
+                
+                Date ngayTao = rs.getDate("ngayTao");
+                if (ngayTao != null)
+                    nv.setNgayTao(ngayTao.toLocalDate());
+
+                nv.setTrangThai(rs.getBoolean("trangThai"));
             }
-        } catch (Exception e) {
+
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return nv;
@@ -93,8 +132,8 @@ public class NhanVien_DAO {
             ps.setString(5, nv.getSoDienThoai());
             ps.setString(6, nv.getEmail());
             ps.setBoolean(7, nv.isChucVu());
-            if (nv.getThoiGianTao() != null)
-                ps.setDate(8, Date.valueOf(nv.getThoiGianTao()));
+            if (nv.getNgayTao() != null)
+                ps.setDate(8, Date.valueOf(nv.getNgayTao()));
             else
                 ps.setNull(8, java.sql.Types.DATE);
             ps.setBoolean(9, nv.isTrangThai());
@@ -138,8 +177,8 @@ public class NhanVien_DAO {
             ps.setString(4, nv.getSoDienThoai());
             ps.setString(5, nv.getEmail());
             ps.setBoolean(6, nv.isChucVu());
-            if (nv.getThoiGianTao() != null)
-                ps.setDate(7, Date.valueOf(nv.getThoiGianTao()));
+            if (nv.getNgayTao() != null)
+                ps.setDate(7, Date.valueOf(nv.getNgayTao()));
             else
                 ps.setNull(7, java.sql.Types.DATE);
             ps.setBoolean(8, nv.isTrangThai());

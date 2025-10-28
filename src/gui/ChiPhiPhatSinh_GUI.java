@@ -68,7 +68,7 @@ public class ChiPhiPhatSinh_GUI extends JPanel implements ActionListener, MouseL
 
         infoPanel.add(formPanel, BorderLayout.CENTER);
 
-        // ==== Buttons ====
+        // ==== Buttons ==== 
         JPanel buttonColumn = new JPanel();
         buttonColumn.setLayout(new BoxLayout(buttonColumn, BoxLayout.Y_AXIS));
         buttonColumn.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 100));
@@ -91,7 +91,7 @@ public class ChiPhiPhatSinh_GUI extends JPanel implements ActionListener, MouseL
 
         infoPanel.add(buttonColumn, BorderLayout.EAST);
 
-        // ==== Table ====
+        // ==== Table ==== 
         JPanel tablePanel = new JPanel(new BorderLayout());
         JLabel lblDS = new JLabel("Danh sách chi phí phát sinh", SwingConstants.CENTER);
         lblDS.setFont(new Font("Tahoma", Font.BOLD, 18));
@@ -121,91 +121,106 @@ public class ChiPhiPhatSinh_GUI extends JPanel implements ActionListener, MouseL
         }
     }
 
+    // Lấy dữ liệu từ form và kiểm tra tính hợp lệ
     private ChiPhiPhatSinh getChiPhiFromForm() {
         String ma = txtMaCP.getText().trim();
         String ten = txtTenCP.getText().trim();
         String loai = cboLoai.getSelectedItem().toString();
-        double gia = Double.parseDouble(txtGia.getText().trim());
-        return new ChiPhiPhatSinh(ma, ten, loai, "", gia);
+        String donViTinh = "VND";  // Đơn vị tính cố định là VND
+        double gia = -1;
+
+        // Kiểm tra mã chi phí
+        if (ma.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Mã chi phí phát sinh không được rỗng");
+            return null;
+        }
+        if (!ma.matches("CP\\d{8}\\d{3}")) {
+            JOptionPane.showMessageDialog(this, "Mã chi phí phát sinh không hợp lệ! (Định dạng: CP + Ngày + Số)");
+            return null;
+        }
+
+        // Kiểm tra tên chi phí
+        if (ten.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Tên chi phí phát sinh không được rỗng");
+            return null;
+        }
+        if (ten.length() > 100) {
+            JOptionPane.showMessageDialog(this, "Tên chi phí phát sinh tối đa 100 ký tự");
+            return null;
+        }
+
+        // Kiểm tra loại chi phí
+        if (!loai.equals("Phạt") && !loai.equals("Dịch vụ")) {
+            JOptionPane.showMessageDialog(this, "Loại chi phí phát sinh không hợp lệ! (Chỉ cho phép 'Phạt' hoặc 'Dịch vụ')");
+            return null;
+        }
+
+        // Kiểm tra giá trị
+        try {
+            gia = Double.parseDouble(txtGia.getText().trim());
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Giá không hợp lệ! Vui lòng nhập một số hợp lệ.");
+            return null;
+        }
+
+        if (gia < 0) {
+            JOptionPane.showMessageDialog(this, "Giá phải lớn hơn hoặc bằng 0");
+            return null;
+        }
+
+        // Tạo đối tượng ChiPhiPhatSinh
+        return new ChiPhiPhatSinh(ma, ten, loai, donViTinh, gia);
+    }
+
+    // Làm sạch các trường nhập liệu
+    private void clearFields() {
+        txtMaCP.setText("");
+        txtTenCP.setText("");
+        cboLoai.setSelectedIndex(0);
+        txtGia.setText("");
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         Object o = e.getSource();
-
-        if (o == btnThem) {
-            try {
-                ChiPhiPhatSinh cp = getChiPhiFromForm();
+        
+        if (o.equals(btnThem)) {
+            ChiPhiPhatSinh cp = getChiPhiFromForm();
+            if (cp != null) {
                 if (dao.insertChiPhi(cp)) {
                     JOptionPane.showMessageDialog(this, "Thêm thành công!");
                     loadDataToTable();
+                    clearFields();
                 } else {
                     JOptionPane.showMessageDialog(this, "Thêm thất bại!");
                 }
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Lỗi dữ liệu: " + ex.getMessage());
             }
-        } else if (o == btnSua) {
-            try {
-                ChiPhiPhatSinh cp = getChiPhiFromForm();
+        } else if (o.equals(btnSua)) {
+            ChiPhiPhatSinh cp = getChiPhiFromForm();
+            if (cp != null) {
                 if (dao.updateChiPhi(cp)) {
                     JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
                     loadDataToTable();
                 } else {
                     JOptionPane.showMessageDialog(this, "Không tìm thấy mã để cập nhật!");
                 }
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Lỗi: " + ex.getMessage());
             }
-//        } else if (o == btnTim) {
-//            String ma = txtMaCP.getText().trim();
-//            if (ma.isEmpty()) {
-//                JOptionPane.showMessageDialog(this, "Vui lòng nhập mã cần tìm!");
-//                return;
-//            }
-//            ChiPhiPhatSinh cp = dao.getChiPhiTheoMa(ma);
-//            if (cp != null) {
-//                txtTenCP.setText(cp.getTenChiPhiPhatSinh());
-//                txtGia.setText(String.valueOf(cp.getGia()));
-//                cboLoai.setSelectedItem(cp.getLoaiChiPhiPhatSinh());
-//            } else {
-//                JOptionPane.showMessageDialog(this, "Không tìm thấy mã: " + ma);
-//            }
-//        }
-        } else if (o == btnTim) {
-                String ma = txtMaCP.getText().trim();
-                if (ma.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Vui lòng nhập mã cần tìm!");
-                    return;
-                }
-
-                ChiPhiPhatSinh cp = dao.getChiPhiTheoMa(ma);
-                if (cp != null) {
-                    // Hiển thị thông tin ra form
-                    txtTenCP.setText(cp.getTenChiPhiPhatSinh());
-                    txtGia.setText(String.valueOf(cp.getGia()));
-                    cboLoai.setSelectedItem(cp.getLoaiChiPhiPhatSinh());
-
-                    // Bôi đen hàng trong bảng
-                    boolean found = false;
-                    for (int i = 0; i < model.getRowCount(); i++) {
-                        String maTable = model.getValueAt(i, 1).toString();
-                        if (maTable.equalsIgnoreCase(ma)) {
-                            table.setRowSelectionInterval(i, i);
-                            table.scrollRectToVisible(table.getCellRect(i, 0, true)); // Cuộn đến hàng đó
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (!found) {
-                        JOptionPane.showMessageDialog(this, "Không tìm thấy mã trong bảng (dù có trong DB).");
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(this, "Không tìm thấy mã: " + ma);
-                }
+        } else if (o.equals(btnTim)) {
+            String ma = txtMaCP.getText().trim();
+            if (ma.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập mã cần tìm!");
+                return;
             }
 
+            ChiPhiPhatSinh cp = dao.getChiPhiTheoMa(ma);
+            if (cp != null) {
+                txtTenCP.setText(cp.getTenChiPhiPhatSinh());
+                txtGia.setText(String.valueOf(cp.getGia()));
+                cboLoai.setSelectedItem(cp.getLoaiChiPhiPhatSinh());
+            } else {
+                JOptionPane.showMessageDialog(this, "Không tìm thấy mã: " + ma);
+            }
+        }
     }
 
     @Override

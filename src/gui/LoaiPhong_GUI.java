@@ -130,7 +130,7 @@ public class LoaiPhong_GUI extends JPanel implements ActionListener, MouseListen
             model.addRow(new Object[]{
                     lp.getMaLoaiPhong(),
                     lp.getTenLoaiPhong(),
-                    lp.getSuaChua(),
+                    lp.getSucChua(),
                     lp.getGia(),
                     lp.getMoTa()
             });
@@ -145,27 +145,74 @@ public class LoaiPhong_GUI extends JPanel implements ActionListener, MouseListen
         String giaStr = txtGia.getText().trim();
         String moTa = txtMoTa.getText().trim();
 
-        if (ma.isEmpty() || ten.isEmpty() || sucChuaStr.isEmpty() || giaStr.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin!");
+        // Kiểm tra xem có nhập đầy đủ thông tin không
+        
+        if (ma.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Mã loại phòng không được để trống!");
+            return null;
+        }
+        // Kiểm tra định dạng mã loại phòng: LP + số
+        if (!ma.matches("LP\\d{3}")) {
+            JOptionPane.showMessageDialog(this, "Mã loại phòng phải có dạng LP + 3 chữ số, ví dụ LP001!");
+            return null;
+        }
+        
+        if (ten.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Tên loại phòng không được để trống!");
+            return null;
+        }
+        // Kiểm tra tên loại phòng không vượt quá 50 ký tự
+        if (ten.length() > 50) {
+            JOptionPane.showMessageDialog(this, "Tên loại phòng không được vượt quá 50 ký tự!");
             return null;
         }
 
+        if (sucChuaStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Sức chứa không được để trống!");
+            return null;
+        }
+        // Kiểm tra sức chứa
         int sucChua;
-        double gia;
         try {
             sucChua = Integer.parseInt(sucChuaStr);
+            if (sucChua <= 0) {
+                JOptionPane.showMessageDialog(this, "Sức chứa phải là số nguyên dương!");
+                return null;
+            }
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Sức chứa phải là số nguyên!");
             return null;
         }
 
+        if (giaStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Giá không được để trống!");
+            return null;
+        }
+
+        // Kiểm tra giá
+        double gia;
         try {
             gia = Double.parseDouble(giaStr);
+            if (gia <= 0) {
+                JOptionPane.showMessageDialog(this, "Giá phải là số thực dương!");
+                return null;
+            }
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Giá phải là số!");
             return null;
         }
 
+        if (ma.isEmpty() || ten.isEmpty() || sucChuaStr.isEmpty() || giaStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin!");
+            return null;
+        }
+        
+        if (moTa.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Mô tả không được để trống!");
+            return null;
+        }
+        
+        // Trả về đối tượng LoaiPhong nếu tất cả kiểm tra đều hợp lệ
         return new LoaiPhong(ma, ten, sucChua, gia, moTa);
     }
 
@@ -223,7 +270,7 @@ public class LoaiPhong_GUI extends JPanel implements ActionListener, MouseListen
             LoaiPhong lp = dao.findByMa(ma);
             if (lp != null) {
                 txtTenLoai.setText(lp.getTenLoaiPhong());
-                txtSucChua.setText(String.valueOf(lp.getSuaChua()));
+                txtSucChua.setText(String.valueOf(lp.getSucChua()));
                 txtGia.setText(String.valueOf(lp.getGia()));
                 txtMoTa.setText(lp.getMoTa());
                 selectRow(ma);

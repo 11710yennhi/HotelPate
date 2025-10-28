@@ -55,6 +55,8 @@ public class Phong_GUI extends JPanel implements ActionListener, MouseListener {
         centerPanel.add(lblMaPhong, gbc);
         gbc.gridx = 1;
         centerPanel.add(textFieldMaPhong, gbc);
+        textFieldMaPhong.setEditable(false);
+
 
         // --- Trạng Thái ---
         JLabel lblTrangThai = new JLabel("Trạng Thái:");
@@ -157,6 +159,27 @@ public class Phong_GUI extends JPanel implements ActionListener, MouseListener {
 
         loadComboLoaiPhong();
         loadTablePhong();
+        
+        
+
+     // 🔽 Thêm đoạn này để tự sinh mã khi chọn loại phòng
+     comboLoaiPhong.addItemListener(new ItemListener() {
+         @Override
+         public void itemStateChanged(ItemEvent e) {
+             if (e.getStateChange() == ItemEvent.SELECTED) {
+                 String selected = (String) comboLoaiPhong.getSelectedItem();
+                 if (selected != null) {
+                     String maLoai = selected.split(" - ")[0];
+                     LoaiPhong lp = loaiPhongDAO.getLoaiPhongTheoMa(maLoai);
+                     if (lp != null) {
+                         String maPhongMoi = generateNextRoomCode(lp);
+                         textFieldMaPhong.setText(maPhongMoi);
+                     }
+                 }
+             }
+         }
+     });
+        
     }
 
     // ==== Load dữ liệu lên JComboBox Loại Phòng ====
@@ -179,12 +202,82 @@ public class Phong_GUI extends JPanel implements ActionListener, MouseListener {
                     p.getMaPhong(),
                     p.getLoaiPhong() != null ? p.getLoaiPhong().getTenLoaiPhong() : "",
                     p.getTrangThai(),
-                    p.getLoaiPhong() != null ? p.getLoaiPhong().getSuaChua() : "",
+                    p.getLoaiPhong() != null ? p.getLoaiPhong().getSucChua() : "",
                     p.getLoaiPhong() != null ? p.getLoaiPhong().getGia() : ""
             };
             tableModel.addRow(row);
         }
     }
+    
+    
+    
+    private String generateNextRoomCode(LoaiPhong loaiPhong) {
+        // Xác định prefix theo loại phòng
+        String prefix;
+        String tenLoai = loaiPhong.getTenLoaiPhong().toLowerCase();
+
+        if (tenLoai.contains("tiêu chuẩn") || tenLoai.contains("standard"))
+            prefix = "P1";
+        else if (tenLoai.contains("cao cấp") || tenLoai.contains("deluxe"))
+            prefix = "P2";
+        else if (tenLoai.contains("gia đình"))
+            prefix = "P3";
+        else
+            prefix = "P9"; // Loại không xác định
+
+        // Lấy mã cao nhất hiện có cho loại này
+        String lastCode = phongDAO.getLastRoomCodeByLoai(prefix);
+
+        if (lastCode == null) {
+            return prefix + "01";
+        }
+
+        // Tách phần số sau prefix, tăng lên 1
+        String numberPart = lastCode.substring(prefix.length());
+        int nextNumber = Integer.parseInt(numberPart) + 1;
+
+        // Giữ đúng định dạng (vd: P101, P102...)
+        return prefix + String.format("%02d", nextNumber);
+    }
+
+    
+    
+    
+    private boolean validateForm(String maPhong, String trangThai, LoaiPhong loaiPhong) {
+        // Kiểm tra mã phòng (Pxxx)
+        if (maPhong == null || maPhong.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Mã phòng không được để trống!");
+            return false;
+        }
+        if (!maPhong.matches("P\\d{3}")) {
+            JOptionPane.showMessageDialog(this, "Mã phòng phải có dạng Pxxx (ví dụ P101).");
+            return false;
+        }
+
+        // Kiểm tra trạng thái
+        if (trangThai == null || trangThai.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Trạng thái không được để trống!");
+            return false;
+        }
+
+        // Chuyển tất cả ký tự về dạng không phân biệt hoa thường và loại bỏ khoảng trắng
+        String trangThaiNormalized = trangThai.trim().toLowerCase();
+
+        if (!(trangThaiNormalized.equals("trống") || trangThaiNormalized.equals("đang ở") || trangThaiNormalized.equals("bảo trì"))) {
+            JOptionPane.showMessageDialog(this, "Trạng thái phải thuộc một trong các giá trị: Trống, Đang ở, Bảo trì.");
+            return false;
+        }
+
+        // Kiểm tra loại phòng
+        if (loaiPhong == null) {
+            JOptionPane.showMessageDialog(this, "Loại phòng không được để trống!");
+            return false;
+        }
+
+        return true;
+    }
+
+
 
     // ==== Xử lý sự kiện ====
     @Override
@@ -199,38 +292,75 @@ public class Phong_GUI extends JPanel implements ActionListener, MouseListener {
 //                comboLoaiPhong.setSelectedIndex(0);
 //
 //        } 
+//        if (o == btnThem) {
+////            String maPhong = textFieldMaPhong.getText().trim();
+//        	// Tự phát sinh mã theo loại phòng
+//        	   String maLoai = selected.split(" - ")[0];
+//            LoaiPhong lp = loaiPhongDAO.getLoaiPhongTheoMa(maLoai);
+//        	String maPhong = generateNextRoomCode(lp);
+//
+//            String trangThai = textFieldTrangThai.getText().trim();
+//            String selected = (String) comboLoaiPhong.getSelectedItem();
+////            if (maPhong.isEmpty() || selected == null) {
+////                JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin!");
+////                return;
+////            }
+//            String maLoai = selected.split(" - ")[0];
+//    
+//            
+//            // Kiểm tra các ràng buộc trước khi thêm hoặc lưu
+//            if (!validateForm(maPhong, trangThai, lp)) {
+//                return;
+//            }
+//            
+//            Phong p = new Phong(maPhong, lp, trangThai);
+//
+//            if (phongDAO.themPhong(p)) {
+//                JOptionPane.showMessageDialog(this, "Thêm phòng thành công!");
+//            } else {
+//                JOptionPane.showMessageDialog(this, "Thêm phòng thất bại!");
+//            }
+//            loadTablePhong();
+//            // Reset form sau khi thêm
+//            textFieldMaPhong.setText("");
+//            textFieldTrangThai.setText("");
+//            comboLoaiPhong.setSelectedIndex(0);
+//        }
         if (o == btnThem) {
             String maPhong = textFieldMaPhong.getText().trim();
             String trangThai = textFieldTrangThai.getText().trim();
             String selected = (String) comboLoaiPhong.getSelectedItem();
-            if (maPhong.isEmpty() || selected == null) {
-                JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin!");
+
+            if (selected == null || maPhong.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn loại phòng và trạng thái!");
                 return;
             }
+
             String maLoai = selected.split(" - ")[0];
             LoaiPhong lp = loaiPhongDAO.getLoaiPhongTheoMa(maLoai);
-            Phong p = new Phong(maPhong, lp, trangThai);
 
-            if (phongDAO.themPhong(p)) {
+            if (!validateForm(maPhong, trangThai, lp))
+                return;
+
+            Phong p = new Phong(maPhong, lp, trangThai);
+            if (phongDAO.themPhong(p))
                 JOptionPane.showMessageDialog(this, "Thêm phòng thành công!");
-            } else {
+            else
                 JOptionPane.showMessageDialog(this, "Thêm phòng thất bại!");
-            }
+
             loadTablePhong();
-            // Reset form sau khi thêm
-            textFieldMaPhong.setText("");
-            textFieldTrangThai.setText("");
-            comboLoaiPhong.setSelectedIndex(0);
         }
+
+
 
         else if (o == btnLuu) {
             String maPhong = textFieldMaPhong.getText().trim();
             String trangThai = textFieldTrangThai.getText().trim();
             String selected = (String) comboLoaiPhong.getSelectedItem();
-            if (maPhong.isEmpty() || selected == null) {
-                JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin!");
-                return;
-            }
+//            if (maPhong.isEmpty() || selected == null) {
+//                JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin!");
+//                return;
+//            }
             String maLoai = selected.split(" - ")[0];
             LoaiPhong lp = loaiPhongDAO.getLoaiPhongTheoMa(maLoai);
             Phong p = new Phong(maPhong, lp, trangThai);

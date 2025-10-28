@@ -208,6 +208,7 @@ public class NhanVien_GUI extends JPanel implements ActionListener, MouseListene
 
     private NhanVien getFormData() {
         try {
+            // Lấy dữ liệu từ form
             String ma = txtMaNV.getText().trim();
             String ten = txtHoTen.getText().trim();
             String sdt = txtSoDT.getText().trim();
@@ -217,17 +218,69 @@ public class NhanVien_GUI extends JPanel implements ActionListener, MouseListene
             boolean tt = rdoHoatDong.isSelected();
 
             LocalDate ngaySinh = null, ngayTao = null;
-            if (dateNgaySinh.getDate() != null)
-                ngaySinh = new java.sql.Date(dateNgaySinh.getDate().getTime()).toLocalDate();
+//            if (dateNgaySinh.getDate() != null)
+//                ngaySinh = new java.sql.Date(dateNgaySinh.getDate().getTime()).toLocalDate();
+//            if (dateNgayTao.getDate() != null)
+//                ngayTao = new java.sql.Date(dateNgayTao.getDate().getTime()).toLocalDate();
+//
+//            // Kiểm tra mã nhân viên: Phải có định dạng NV+NgàyThángNăm+MãSố
+//            if (ma.isEmpty()) {
+//                JOptionPane.showMessageDialog(this, "Mã nhân viên không được rỗng!");
+//                return null;
+//            }
+            
+            // Kiểm tra ngày sinh: không được để trống
+           
+
             if (dateNgayTao.getDate() != null)
                 ngayTao = new java.sql.Date(dateNgayTao.getDate().getTime()).toLocalDate();
+            if (!ma.matches("^NV\\d{8}\\d{3}$")) { // Định dạng NVddMMyyyyXXX
+                JOptionPane.showMessageDialog(this, "Mã nhân viên phải có định dạng NVddMMyyyyXXX (Ví dụ: NV20092025001)");
+                return null;
+            }
 
+         // Kiểm tra họ tên: Chỉ cho phép ký tự chữ (không có dấu) và khoảng trắng, tối đa 50 ký tự và không được rỗng
+            if (ten.isEmpty() || ten.length() > 50 || !ten.matches("^[a-zA-Z\\s]{1,50}$")) {
+                JOptionPane.showMessageDialog(this, "Họ tên không hợp lệ! (Chỉ được phép chứa chữ cái không dấu và khoảng trắng, không quá 50 ký tự)");
+                return null;
+            }
+
+
+            // Kiểm tra số điện thoại: Phải có 10 chữ số
+            if (sdt.isEmpty() || !sdt.matches("\\d{10}")) {
+                JOptionPane.showMessageDialog(this, "Số điện thoại phải là số và có 10 ký tự!");
+                return null;
+            }
+            
+            
+            if (dateNgaySinh.getDate() == null) {
+                JOptionPane.showMessageDialog(this, "Ngày sinh không được để trống!");
+                return null;
+            } else {
+                ngaySinh = new java.sql.Date(dateNgaySinh.getDate().getTime()).toLocalDate();
+            }
+
+            // Kiểm tra ngày sinh: Phải lớn hơn 18 tuổi
+            LocalDate today = LocalDate.now();
+            if (ngaySinh != null && ngaySinh.plusYears(18).isAfter(today)) {
+                JOptionPane.showMessageDialog(this, "Người dùng phải trên 18 tuổi!");
+                return null;
+            }
+            
+            // Kiểm tra email: Phải có dạng chuẩn
+            if (email.isEmpty() || !email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")) {
+                JOptionPane.showMessageDialog(this, "Email không hợp lệ (abc@gmail.com)!");
+                return null;
+            }
+
+            // Tạo đối tượng NhanVien với dữ liệu hợp lệ
             return new NhanVien(ma, ten, sdt, email, cv, ngayTao, tt, gt, ngaySinh);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Lỗi đọc dữ liệu từ form!");
             return null;
         }
     }
+
 
     // ===== XỬ LÝ SỰ KIỆN =====
     @Override
