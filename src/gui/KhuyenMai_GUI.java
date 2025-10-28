@@ -78,7 +78,9 @@ public class KhuyenMai_GUI extends JPanel implements ActionListener, MouseListen
 	}
 	private void initForm() {
         JPanel p = new JPanel(new BorderLayout(10, 10));
-        p.setBorder(new TitledBorder("Khuyến mãi"));
+        TitledBorder title = new TitledBorder("Khuyến mãi");
+        title.setTitleFont(new Font("Segoe UI Semibold", Font.BOLD, 24));
+        p.setBorder(title);
         p.setBackground(Color.WHITE);
         add(p, BorderLayout.NORTH);
 
