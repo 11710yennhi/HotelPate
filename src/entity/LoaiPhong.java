@@ -3,6 +3,7 @@ package entity;
 import java.util.Objects;
 
 public class LoaiPhong {
+
     private String maLoaiPhong;
     private String tenLoaiPhong;
     private int sucChua;
@@ -81,8 +82,8 @@ public class LoaiPhong {
 
     @Override
     public String toString() {
-        return "LoaiPhong [maLoaiPhong=" + maLoaiPhong + ", tenLoaiPhong=" + tenLoaiPhong + 
-               ", sucChua=" + sucChua + ", gia=" + gia + ", moTa=" + moTa + "]";
+        return "LoaiPhong [maLoaiPhong=" + maLoaiPhong + ", tenLoaiPhong=" + tenLoaiPhong
+                + ", sucChua=" + sucChua + ", gia=" + gia + ", moTa=" + moTa + "]";
     }
 
     @Override

@@ -1,4 +1,3 @@
-
 package dao;
 
 import java.sql.Connection;
@@ -44,9 +43,11 @@ public class NhanVien_DAO {
                 NhanVien nv = new NhanVien(maNV, hoTen, gioiTinh, ngaySinh, soDienThoai, email, chucVu, ngayTao, trangThai);
                 dsnv.add(nv);
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return dsnv;
     }
 

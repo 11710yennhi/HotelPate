@@ -4,23 +4,24 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import connectDB.ConnectDB;
-import entity.ChiPhiPhatSinh;
 import javax.swing.JOptionPane;
 
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 
+import connectDB.ConnectDB;
+import entity.ChiPhiPhatSinh;
+
 public class ChiPhiPhatSinh_DAO {
 
-
+    // Đọc tất cả dữ liệu từ bảng ChiPhiPhatSinh
     public List<ChiPhiPhatSinh> getAllChiPhiPhatSinh() {
         List<ChiPhiPhatSinh> ds = new ArrayList<>();
         String sql = "SELECT * FROM ChiPhiPhatSinh";
-        
+
         try (Connection con = ConnectDB.getInstance().getConnection();
              Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-            
+
             while (rs.next()) {
                 String ma = rs.getString("maChiPhiPhatSinh");
                 String ten = rs.getString("tenChiPhiPhatSinh");
@@ -37,7 +38,6 @@ public class ChiPhiPhatSinh_DAO {
         return ds;
     }
 
-
     // Thêm mới
     public boolean insertChiPhi(ChiPhiPhatSinh cp) {
         String sql = "INSERT INTO ChiPhiPhatSinh (maChiPhiPhatSinh, tenChiPhiPhatSinh, loaiChiPhiPhatSinh, gia) VALUES (?, ?, ?, ?)";
@@ -51,17 +51,22 @@ public class ChiPhiPhatSinh_DAO {
 
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
-            
+
         } catch (SQLServerException e) {
             if (e.getMessage().contains("Violation of UNIQUE KEY constraint")) {
-                // Hiển thị thông báo lỗi nếu vi phạm UNIQUE KEY constraint
-                JOptionPane.showMessageDialog(null, "Lỗi: Mã chi phí đã tồn tại trong hệ thống!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, 
+                    "Lỗi: Mã chi phí đã tồn tại trong hệ thống!", 
+                    "Lỗi", JOptionPane.ERROR_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(null, "Lỗi khi thao tác với cơ sở dữ liệu: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, 
+                    "Lỗi khi thao tác với cơ sở dữ liệu: " + e.getMessage(), 
+                    "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Lỗi khi thao tác với cơ sở dữ liệu: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, 
+                "Lỗi khi thao tác với cơ sở dữ liệu: " + e.getMessage(), 
+                "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
         return false;
     }
@@ -82,7 +87,9 @@ public class ChiPhiPhatSinh_DAO {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Lỗi khi cập nhật cơ sở dữ liệu: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, 
+                "Lỗi khi cập nhật cơ sở dữ liệu: " + e.getMessage(), 
+                "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
         return false;
     }
@@ -107,12 +114,14 @@ public class ChiPhiPhatSinh_DAO {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Lỗi khi tìm kiếm cơ sở dữ liệu: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, 
+                "Lỗi khi tìm kiếm cơ sở dữ liệu: " + e.getMessage(), 
+                "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
         return cp;
     }
 
- // Tìm kiếm theo tên (trả về 1 chi phí duy nhất)
+    // Tìm kiếm theo tên (trả về 1 chi phí duy nhất)
     public ChiPhiPhatSinh getChiPhiTheoTen(String ten) {
         String sql = "SELECT TOP 1 * FROM ChiPhiPhatSinh WHERE TRIM(tenChiPhiPhatSinh) = ?";
         ChiPhiPhatSinh cp = null;
@@ -120,7 +129,7 @@ public class ChiPhiPhatSinh_DAO {
         try (Connection con = ConnectDB.getInstance().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ps.setString(1, ten.trim()); // loại bỏ khoảng trắng ở đầu/cuối khi so sánh
+            ps.setString(1, ten.trim());
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
@@ -141,7 +150,8 @@ public class ChiPhiPhatSinh_DAO {
 
         return cp;
     }
- // Thêm chi tiết chi phí phát sinh vào phiếu đặt phòng
+
+    // Thêm chi tiết chi phí phát sinh vào phiếu đặt phòng
     public boolean themChiTietChiPhi(String maPhieuDatPhong, String maChiPhiPhatSinh, int soLuong) {
         String sql = "INSERT INTO ChiTietChiPhiPhatSinh (maPhieuDatPhong, maChiPhiPhatSinh, soLuong) VALUES (?, ?, ?)";
         
@@ -173,6 +183,4 @@ public class ChiPhiPhatSinh_DAO {
         }
         return false;
     }
-
-
 }

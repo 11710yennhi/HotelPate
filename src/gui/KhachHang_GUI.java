@@ -186,7 +186,9 @@ public class KhachHang_GUI extends JPanel implements ActionListener, MouseListen
                 return;
             }
 
+
             KhachHang kh = khDAO.getKhachHangTheoSDT(sdt);
+
             if (kh != null) {
                 txtMaKH.setText(kh.getMaKhachHang());
                 txtHoTen.setText(kh.getHoTen());
