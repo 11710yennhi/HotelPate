@@ -37,8 +37,8 @@ public class KhachHang_DAO {
 		return dskh;
 	}
 
-	// Lấy khách hàng theo số điện thoại
-	public KhachHang getKhachHangTheoSDT(String sdt) {
+	// Lấy khách hàng theo số điện thoại - khachhang
+	public KhachHang getKhachHangThSDTKH(String sdt) {
 		KhachHang kh = null;
 		try {
 			Connection con = ConnectDB.getInstance().getConnection();
@@ -58,29 +58,83 @@ public class KhachHang_DAO {
 		}
 		return kh;
 	}
+	// lấy kh theo sdt - phieudatphong
+	 public List<KhachHang> getKhachHangTheoSDT(String soDT) {
+	        List<KhachHang> dsKhachHang = new ArrayList<>();
+	        Connection con = null;
+	        PreparedStatement ps = null;
+	        ResultSet rs = null;
+
+	        try {
+	            con = ConnectDB.getConnection();
+	            String sql = "SELECT maKhachHang, hoTen, soDienThoai, laNguoiVietNam "
+	                       + "FROM KhachHang WHERE soDienThoai LIKE ?";
+	            ps = con.prepareStatement(sql);
+	            ps.setString(1, "%" + soDT + "%"); // dùng LIKE để tìm gần đúng
+	            rs = ps.executeQuery();
+
+	            while (rs.next()) {
+	                String maKhachHang = rs.getString("maKhachHang");
+	                String hoTen = rs.getString("hoTen");
+	                String soDienThoai = rs.getString("soDienThoai");
+	                boolean laNguoiVietNam = rs.getBoolean("laNguoiVietNam");
+
+	                KhachHang kh = new KhachHang(maKhachHang, hoTen, soDienThoai, laNguoiVietNam);
+	                dsKhachHang.add(kh);
+	            }
+
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        } finally {
+	            try {
+	                if (rs != null) rs.close();
+	                if (ps != null) ps.close();
+	            } catch (SQLException e) {
+	                e.printStackTrace();
+	            }
+	        }
+
+	        return dsKhachHang;
+	    }
+
 
 	// Lấy khách hàng theo mã khách hàng
-	public KhachHang getKhachHangTheoMa(String maKH) {
-        KhachHang kh = null;
-        try {
-            Connection con = ConnectDB.getInstance().getConnection();
-            String sql = "SELECT * FROM KhachHang WHERE maKhachHang = ?";
-            PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, maKH);
-            ResultSet rs = stmt.executeQuery();
+	 public KhachHang getKhachHangTheoMa(String maKH) {
+	        KhachHang kh = null;
+	        Connection con = null;
+	        PreparedStatement ps = null;
+	        ResultSet rs = null;
 
-            if (rs.next()) {
-                String hoTen = rs.getString("hoTen");
-                String soDienThoai = rs.getString("soDienThoai");
-                boolean laNguoiVietNam = rs.getBoolean("laNguoiVietNam");
+	        try {
+	            con = ConnectDB.getConnection();
+	            String sql = "SELECT maKhachHang, hoTen, soDienThoai, laNguoiVietNam FROM KhachHang WHERE maKhachHang = ?";
+	            ps = con.prepareStatement(sql);
+	            ps.setString(1, maKH);
+	            rs = ps.executeQuery();
 
-                kh = new KhachHang(maKH, hoTen, soDienThoai, laNguoiVietNam);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return kh;
-    }
+	            if (rs.next()) {
+	                String maKhachHang = rs.getString("maKhachHang");
+	                String hoTen = rs.getString("hoTen");
+	                String soDienThoai = rs.getString("soDienThoai");
+	                boolean laNguoiVietNam = rs.getBoolean("laNguoiVietNam");
+
+	                kh = new KhachHang(maKhachHang, hoTen, soDienThoai, laNguoiVietNam);
+	            }
+
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        } finally {
+	            try {
+	                if (rs != null) rs.close();
+	                if (ps != null) ps.close();
+	            } catch (SQLException e) {
+	                e.printStackTrace();
+	            }
+	        }
+
+	        return kh;
+	    }
+
 
 	public String taoMaKhachHangTuDong() {
 
@@ -110,25 +164,35 @@ public class KhachHang_DAO {
 	}
 
 	// Thêm mới khách hàng
-	public boolean create(KhachHang kh) {
-		int n = 0;
-		try {
-			ConnectDB.getInstance();
-			Connection con = ConnectDB.getConnection();
-			String sql = "INSERT INTO KhachHang (maKhachHang, hoTen, soDienThoai, laNguoiVietNam) VALUES (?, ?, ?, ?)";
-			PreparedStatement ps = con.prepareStatement(sql);
+	 public boolean themKhachHang(KhachHang kh) {
+	        String sql = "INSERT INTO KhachHang (maKhachHang, hoTen, soDienThoai, laNguoiVietNam) VALUES (?, ?, ?, ?)";
+	        Connection con = null;
+	        PreparedStatement ps = null;
 
-			ps.setString(1, kh.getMaKhachHang());
-			ps.setString(2, kh.getHoTen());
-			ps.setString(3, kh.getSoDienThoai());
-			ps.setBoolean(4, kh.LaNguoiVietNam());
+	        try {
+	            con = ConnectDB.getConnection();
+	            ps = con.prepareStatement(sql);
 
-			n = ps.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return n > 0;
-	}
+	            ps.setString(1, kh.getMaKhachHang());
+	            ps.setString(2, kh.getHoTen());
+	            ps.setString(3, kh.getSoDienThoai());
+	            ps.setBoolean(4, kh.LaNguoiVietNam());
+
+	            int result = ps.executeUpdate();
+	            return result > 0; // trả về true nếu thêm thành công
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        } finally {
+	            try {
+	                if (ps != null) ps.close();
+	            } catch (SQLException e) {
+	                e.printStackTrace();
+	            }
+	        }
+
+	        return false;
+	    }
+
 
 //    // Xóa khách hàng
 //    public boolean delete(String maKH) {
@@ -148,22 +212,33 @@ public class KhachHang_DAO {
 //    }
 
 	// Cập nhật khách hàng
-	public boolean update(KhachHang kh) {
-		int n = 0;
-		try {
-			ConnectDB.getInstance();
-			Connection con = ConnectDB.getConnection();
-			String sql = "UPDATE KhachHang SET hoTen = ?, laNguoiVietNam = ? WHERE soDienThoai = ?";
-			PreparedStatement ps = con.prepareStatement(sql);
+	 public boolean capNhatKhachHang(KhachHang kh) {
+	        String sql = "UPDATE KhachHang SET hoTen = ?, soDienThoai = ?, laNguoiVietNam = ? WHERE maKhachHang = ?";
+	        Connection con = null;
+	        PreparedStatement ps = null;
 
-			ps.setString(1, kh.getHoTen());
-			ps.setBoolean(2, kh.LaNguoiVietNam());
-			ps.setString(3, kh.getSoDienThoai());
+	        try {
+	            con = ConnectDB.getConnection();
+	            ps = con.prepareStatement(sql);
 
-			n = ps.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return n > 0;
-	}
+	            ps.setString(1, kh.getHoTen());
+	            ps.setString(2, kh.getSoDienThoai());
+	            ps.setBoolean(3, kh.LaNguoiVietNam());
+	            ps.setString(4, kh.getMaKhachHang());
+
+	            int result = ps.executeUpdate();
+	            return result > 0; // true nếu cập nhật thành công
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        } finally {
+	            try {
+	                if (ps != null) ps.close();
+	            } catch (SQLException e) {
+	                e.printStackTrace();
+	            }
+	        }
+
+	        return false;
+	    }
+
 }

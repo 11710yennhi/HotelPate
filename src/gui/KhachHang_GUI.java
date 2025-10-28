@@ -66,8 +66,8 @@ public class KhachHang_GUI extends JPanel implements ActionListener, MouseListen
         formPanel.add(new JLabel("Số điện thoại:"));
         JPanel sdtPanel = new JPanel(new BorderLayout(5, 0));
         sdtPanel.setBackground(Color.WHITE);
-        txtSoDT = new JTextField();
-        setTextFieldHeight(txtSoDT);
+        txtSoDT = new JTextField(10);
+//        setTextFieldHeight(txtSoDT);
         btnTim = new JButton("🔍");
         btnTim.setBackground(new Color(200, 220, 250));
         btnTim.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 15));
@@ -88,7 +88,7 @@ public class KhachHang_GUI extends JPanel implements ActionListener, MouseListen
         // Cột nút bên phải
         JPanel buttonCol = new JPanel();
         buttonCol.setLayout(new BoxLayout(buttonCol, BoxLayout.Y_AXIS));
-        buttonCol.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        buttonCol.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         buttonCol.setBackground(Color.WHITE);
 
         btnSua = new JButton("Lưu");
@@ -110,11 +110,11 @@ public class KhachHang_GUI extends JPanel implements ActionListener, MouseListen
         btnXoaRong.addActionListener(this);
 //        buttonCol.add(btnXoaRong);
 
-        buttonCol.add(Box.createVerticalGlue()); // đẩy nút xuống giữa
+        //buttonCol.add(Box.createVerticalGlue()); // đẩy nút xuống giữa
         buttonCol.add(btnSua);
-        buttonCol.add(Box.createVerticalStrut(10));
+        buttonCol.add(Box.createVerticalStrut(5));
         buttonCol.add(btnXoaRong);
-        buttonCol.add(Box.createVerticalGlue()); // đẩy nút lên trên
+        //buttonCol.add(Box.createVerticalGlue()); // đẩy nút lên trên
 
         infoPanel.add(buttonCol, BorderLayout.EAST);
 
@@ -129,7 +129,7 @@ public class KhachHang_GUI extends JPanel implements ActionListener, MouseListen
     // Giảm chiều cao JTextField để đều với JLabel
     private void setTextFieldHeight(JTextField txt) {
         Dimension size = txt.getPreferredSize();
-        size.height = 25;
+        size.height = 15;
         txt.setPreferredSize(size);
     }
 
@@ -186,7 +186,7 @@ public class KhachHang_GUI extends JPanel implements ActionListener, MouseListen
                 return;
             }
 
-            KhachHang kh = khDAO.getKhachHangTheoSDT(sdt);
+            KhachHang kh = khDAO.getKhachHangThSDTKH(sdt);
             if (kh != null) {
                 txtMaKH.setText(kh.getMaKhachHang());
                 txtHoTen.setText(kh.getHoTen());
@@ -198,7 +198,7 @@ public class KhachHang_GUI extends JPanel implements ActionListener, MouseListen
         } else if (o.equals(btnSua)) {
             KhachHang kh = getFormData();
             if (kh != null) {
-                if (khDAO.update(kh)) {
+                if (khDAO.capNhatKhachHang(kh)) {
                     JOptionPane.showMessageDialog(this, "Cập nhật thông tin thành công!");
                     loadKhachHangToTable();
                 } else {
@@ -206,8 +206,8 @@ public class KhachHang_GUI extends JPanel implements ActionListener, MouseListen
                 }
             }
         } else if (o.equals(btnXoaRong)) {
-            xoaRongForm();
-        }
+			xoaRongForm();
+		}
     }
 
     @Override
