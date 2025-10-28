@@ -12,7 +12,7 @@ import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 public class ChiPhiPhatSinh_DAO {
 
-    // Đọc tất cả dữ liệu từ bảng ChiPhiPhatSinh
+
     public List<ChiPhiPhatSinh> getAllChiPhiPhatSinh() {
         List<ChiPhiPhatSinh> ds = new ArrayList<>();
         String sql = "SELECT * FROM ChiPhiPhatSinh";
@@ -36,6 +36,7 @@ public class ChiPhiPhatSinh_DAO {
         }
         return ds;
     }
+
 
     // Thêm mới
     public boolean insertChiPhi(ChiPhiPhatSinh cp) {
@@ -110,6 +111,7 @@ public class ChiPhiPhatSinh_DAO {
         }
         return cp;
     }
+
  // Tìm kiếm theo tên (trả về 1 chi phí duy nhất)
     public ChiPhiPhatSinh getChiPhiTheoTen(String ten) {
         String sql = "SELECT TOP 1 * FROM ChiPhiPhatSinh WHERE TRIM(tenChiPhiPhatSinh) = ?";

@@ -23,6 +23,9 @@ public class ChiTietChiPhiPhatSinh {
     }
 
     public void setPhieuDatPhong(PhieuDatPhong phieuDatPhong) {
+        if (phieuDatPhong == null) {
+            throw new IllegalArgumentException("PhieuDatPhong không được null");
+        }
         this.phieuDatPhong = phieuDatPhong;
     }
 
@@ -31,6 +34,9 @@ public class ChiTietChiPhiPhatSinh {
     }
 
     public void setChiPhiPhatSinh(ChiPhiPhatSinh chiPhiPhatSinh) {
+        if (chiPhiPhatSinh == null) {
+            throw new IllegalArgumentException("ChiPhiPhatSinh không được null");
+        }
         this.chiPhiPhatSinh = chiPhiPhatSinh;
     }
 
@@ -39,6 +45,9 @@ public class ChiTietChiPhiPhatSinh {
     }
 
     public void setSoLuong(int soLuong) {
+        if (soLuong <= 0) {
+            throw new IllegalArgumentException("Số lượng phải lớn hơn 0");
+        }
         this.soLuong = soLuong;
         tinhThanhTien();
     }
@@ -46,6 +55,7 @@ public class ChiTietChiPhiPhatSinh {
     public double getThanhTien() {
         return thanhTien;
     }
+
 
     public void tinhThanhTien() {
         if (chiPhiPhatSinh != null)

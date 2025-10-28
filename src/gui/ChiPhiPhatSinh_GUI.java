@@ -1,62 +1,50 @@
 package gui;
 
 import java.awt.*;
+import java.awt.event.*;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
 
-public class ChiPhiPhatSinh_GUI {
+import dao.ChiPhiPhatSinh_DAO;
+import entity.ChiPhiPhatSinh;
 
-    private JFrame frame;
+public class ChiPhiPhatSinh_GUI extends JPanel implements ActionListener, MouseListener {
+
     private JTextField txtMaCP, txtGia, txtTenCP;
     private JTable table;
     private JComboBox<String> cboLoai;
-
-    public static void main(String[] args) {
-        EventQueue.invokeLater(() -> {
-            try {
-                ChiPhiPhatSinh_GUI window = new ChiPhiPhatSinh_GUI();
-                window.frame.setVisible(true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
+    private DefaultTableModel model;
+    private JButton btnThem, btnSua, btnTim;
+    private ChiPhiPhatSinh_DAO dao = new ChiPhiPhatSinh_DAO();
 
     public ChiPhiPhatSinh_GUI() {
         initialize();
+        loadDataToTable();
     }
 
     private void initialize() {
-        frame = new JFrame("Chi Phí Phát Sinh");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setLayout(new BorderLayout(10, 10));
+        setBackground(Color.WHITE);
 
-        // ==== MAIN PANEL ====
-        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBackground(Color.WHITE);
-        frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
-
-        // ==== TITLE ====
         JLabel lblTitle = new JLabel("CHI PHÍ PHÁT SINH", SwingConstants.CENTER);
         lblTitle.setFont(new Font("Tahoma", Font.BOLD, 26));
         lblTitle.setForeground(new Color(30, 60, 114));
-        mainPanel.add(lblTitle, BorderLayout.NORTH);
+        add(lblTitle, BorderLayout.NORTH);
 
-        // ==== PANEL THÔNG TIN ====
         JPanel infoPanel = new JPanel(new BorderLayout(10, 10));
         infoPanel.setBorder(new TitledBorder("Thông tin chi phí phát sinh"));
-        mainPanel.add(infoPanel, BorderLayout.NORTH);
+        infoPanel.setBackground(Color.WHITE);
+        add(infoPanel, BorderLayout.NORTH);
 
-        // ==== FORM ====
         JPanel formPanel = new JPanel(new GridLayout(2, 1, 10, 10));
         formPanel.setBackground(Color.WHITE);
 
-        // === Hàng 1: Mã và Giá ===
         JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 30));
-        JLabel lblMa = new JLabel("Mã chi phí phát sinh: ");
+        JLabel lblMa = new JLabel("Mã chi phí:");
         txtMaCP = new JTextField(40);
-        txtMaCP.setEditable(false);
-        JLabel lblGia = new JLabel("Giá:              ");
+        JLabel lblGia = new JLabel("Giá:                ");
         txtGia = new JTextField(40);
         row1.add(lblMa);
         row1.add(txtMaCP);
@@ -65,9 +53,8 @@ public class ChiPhiPhatSinh_GUI {
         row1.setBackground(Color.WHITE);
         formPanel.add(row1);
 
-        // === Hàng 2: Tên và Loại ===
         JPanel row2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 5));
-        JLabel lblTen = new JLabel("Tên chi phí phát sinh:");
+        JLabel lblTen = new JLabel("Tên chi phí:");
         txtTenCP = new JTextField(40);
         JLabel lblLoai = new JLabel("Loại chi phí:");
         cboLoai = new JComboBox<>(new String[]{"Dịch vụ", "Phạt"});
@@ -81,48 +68,184 @@ public class ChiPhiPhatSinh_GUI {
 
         infoPanel.add(formPanel, BorderLayout.CENTER);
 
-        // ==== CỘT NÚT BÊN PHẢI ====
+        // ==== Buttons ==== 
         JPanel buttonColumn = new JPanel();
         buttonColumn.setLayout(new BoxLayout(buttonColumn, BoxLayout.Y_AXIS));
-        buttonColumn.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        buttonColumn.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 100));
         buttonColumn.setBackground(Color.WHITE);
 
-        JButton btnThem = new JButton("Thêm");
-        JButton btnSua = new JButton("Lưu");
-        JButton btnTim = new JButton("Tìm kiếm");
+        btnThem = new JButton("Thêm");
+        btnSua = new JButton("Lưu");
+        btnTim = new JButton("Tìm kiếm");
 
-        Dimension btnSize = new Dimension(120, 35);
         for (JButton btn : new JButton[]{btnThem, btnSua, btnTim}) {
+            btn.setFont(new Font("Tahoma", Font.PLAIN, 14));
+            btn.setBackground(new Color(220, 230, 250));
+            btn.setFocusPainted(false);
             btn.setAlignmentX(Component.CENTER_ALIGNMENT);
-            btn.setMaximumSize(btnSize);
-            btn.setPreferredSize(btnSize);
-            btnColumnStyle(btn);
+            btn.setMaximumSize(new Dimension(120, 35));
             buttonColumn.add(btn);
             buttonColumn.add(Box.createVerticalStrut(10));
+            btn.addActionListener(this);
         }
 
         infoPanel.add(buttonColumn, BorderLayout.EAST);
 
-        // ==== BẢNG DỮ LIỆU ====
+        // ==== Table ==== 
         JPanel tablePanel = new JPanel(new BorderLayout());
-        JLabel lblDS = new JLabel("Danh sách chi phí phát sinh");
+        JLabel lblDS = new JLabel("Danh sách chi phí phát sinh", SwingConstants.CENTER);
         lblDS.setFont(new Font("Tahoma", Font.BOLD, 18));
         lblDS.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         tablePanel.add(lblDS, BorderLayout.NORTH);
 
-        String[] columns = {"STT", "Mã Chi Phí Phát Sinh", "Tên Chi Phí Phát Sinh", "Giá ", "Loại Chi Phí"};
-        Object[][] data = {};
-        table = new JTable(data, columns);
+        String[] columns = {"STT", "Mã CP", "Tên CP", "Loại", "Giá"};
+        model = new DefaultTableModel(columns, 0);
+        table = new JTable(model);
+        table.addMouseListener(this);
         JScrollPane scrollPane = new JScrollPane(table);
         tablePanel.add(scrollPane, BorderLayout.CENTER);
 
-        mainPanel.add(tablePanel, BorderLayout.CENTER);
+        add(tablePanel, BorderLayout.CENTER);
     }
 
-    private void btnColumnStyle(JButton btn) {
-        btn.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        btn.setBackground(new Color(220, 230, 250));
-        btn.setFocusPainted(false);
-        btn.setBorder(BorderFactory.createLineBorder(new Color(150, 150, 200)));
+    // Đọc dữ liệu từ DB lên bảng
+    private void loadDataToTable() {
+        model.setRowCount(0);
+        List<ChiPhiPhatSinh> list = dao.getAllChiPhiPhatSinh();
+        int stt = 1;
+        for (ChiPhiPhatSinh cp : list) {
+            model.addRow(new Object[]{
+                stt++, cp.getMaChiPhiPhatSinh(), cp.getTenChiPhiPhatSinh(),
+                cp.getLoaiChiPhiPhatSinh(), cp.getGia()
+            });
+        }
+    }
+
+    // Lấy dữ liệu từ form và kiểm tra tính hợp lệ
+    private ChiPhiPhatSinh getChiPhiFromForm() {
+        String ma = txtMaCP.getText().trim();
+        String ten = txtTenCP.getText().trim();
+        String loai = cboLoai.getSelectedItem().toString();
+        String donViTinh = "VND";  // Đơn vị tính cố định là VND
+        double gia = -1;
+
+        // Kiểm tra mã chi phí
+        if (ma.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Mã chi phí phát sinh không được rỗng");
+            return null;
+        }
+        if (!ma.matches("CP\\d{8}\\d{3}")) {
+            JOptionPane.showMessageDialog(this, "Mã chi phí phát sinh không hợp lệ! (Định dạng: CP + Ngày + Số)");
+            return null;
+        }
+
+        // Kiểm tra tên chi phí
+        if (ten.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Tên chi phí phát sinh không được rỗng");
+            return null;
+        }
+        if (ten.length() > 100) {
+            JOptionPane.showMessageDialog(this, "Tên chi phí phát sinh tối đa 100 ký tự");
+            return null;
+        }
+
+        // Kiểm tra loại chi phí
+        if (!loai.equals("Phạt") && !loai.equals("Dịch vụ")) {
+            JOptionPane.showMessageDialog(this, "Loại chi phí phát sinh không hợp lệ! (Chỉ cho phép 'Phạt' hoặc 'Dịch vụ')");
+            return null;
+        }
+
+        // Kiểm tra giá trị
+        try {
+            gia = Double.parseDouble(txtGia.getText().trim());
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Giá không hợp lệ! Vui lòng nhập một số hợp lệ.");
+            return null;
+        }
+
+        if (gia < 0) {
+            JOptionPane.showMessageDialog(this, "Giá phải lớn hơn hoặc bằng 0");
+            return null;
+        }
+
+        // Tạo đối tượng ChiPhiPhatSinh
+        return new ChiPhiPhatSinh(ma, ten, loai, donViTinh, gia);
+    }
+
+    // Làm sạch các trường nhập liệu
+    private void clearFields() {
+        txtMaCP.setText("");
+        txtTenCP.setText("");
+        cboLoai.setSelectedIndex(0);
+        txtGia.setText("");
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        Object o = e.getSource();
+        
+        if (o.equals(btnThem)) {
+            ChiPhiPhatSinh cp = getChiPhiFromForm();
+            if (cp != null) {
+                if (dao.insertChiPhi(cp)) {
+                    JOptionPane.showMessageDialog(this, "Thêm thành công!");
+                    loadDataToTable();
+                    clearFields();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Thêm thất bại!");
+                }
+            }
+        } else if (o.equals(btnSua)) {
+            ChiPhiPhatSinh cp = getChiPhiFromForm();
+            if (cp != null) {
+                if (dao.updateChiPhi(cp)) {
+                    JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
+                    loadDataToTable();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Không tìm thấy mã để cập nhật!");
+                }
+            }
+        } else if (o.equals(btnTim)) {
+            String ma = txtMaCP.getText().trim();
+            if (ma.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập mã cần tìm!");
+                return;
+            }
+
+            ChiPhiPhatSinh cp = dao.getChiPhiTheoMa(ma);
+            if (cp != null) {
+                txtTenCP.setText(cp.getTenChiPhiPhatSinh());
+                txtGia.setText(String.valueOf(cp.getGia()));
+                cboLoai.setSelectedItem(cp.getLoaiChiPhiPhatSinh());
+            } else {
+                JOptionPane.showMessageDialog(this, "Không tìm thấy mã: " + ma);
+            }
+        }
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        int row = table.getSelectedRow();
+        if (row != -1) {
+            txtMaCP.setText(model.getValueAt(row, 1).toString());
+            txtTenCP.setText(model.getValueAt(row, 2).toString());
+            cboLoai.setSelectedItem(model.getValueAt(row, 3).toString());
+            txtGia.setText(model.getValueAt(row, 4).toString());
+        }
+    }
+
+    @Override public void mousePressed(MouseEvent e) {}
+    @Override public void mouseReleased(MouseEvent e) {}
+    @Override public void mouseEntered(MouseEvent e) {}
+    @Override public void mouseExited(MouseEvent e) {}
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Chi Phí Phát Sinh");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            frame.add(new ChiPhiPhatSinh_GUI());
+            frame.setVisible(true);
+        });
     }
 }

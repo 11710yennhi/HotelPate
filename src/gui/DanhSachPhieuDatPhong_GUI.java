@@ -130,7 +130,7 @@ public class DanhSachPhieuDatPhong_GUI extends JPanel implements ActionListener,
     	        return;
     	    }
 
-    	    List<KhachHang> dsKhach = khd.getKhachHangTheoSDT(sdt);
+    	    List<KhachHang> dsKhach = khd.timKhachHangTheoSDTGanDung(sdt);
 
     	    if (dsKhach.isEmpty()) {
     	        JOptionPane.showMessageDialog(null, "Không tìm thấy khách hàng có số điện thoại: " + sdt);
