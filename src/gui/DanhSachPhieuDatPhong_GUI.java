@@ -17,6 +17,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class DanhSachPhieuDatPhong_GUI extends JPanel implements ActionListener, MouseListener {
@@ -100,29 +101,82 @@ public class DanhSachPhieuDatPhong_GUI extends JPanel implements ActionListener,
     @Override public void actionPerformed(ActionEvent e) {
     	Object o = e.getSource();
     	
-    	if(o.equals(btCapNhat)) {
-    		pnlCards.removeAll();
-    		CapNhatPhieuDatPhong();
-    		 pnlCards.revalidate();
-    		    pnlCards.repaint();
+    	if (o.equals(btCapNhat)) {
+    	    System.out.println("Đang cập nhật danh sách phiếu...");
+    	    pnlCards.removeAll();         // Xóa giao diện cũ
+    	    CapNhatPhieuDatPhong();       // Tạo lại toàn bộ phiếu
+    	    pnlCards.revalidate();        // Cập nhật lại bố cục
+    	    pnlCards.repaint();           // Vẽ lại giao diện
+    	    pnlCards.getParent().revalidate(); // Cập nhật panel cha
+    	    pnlCards.getParent().repaint();
     	}
-    	if(o.equals(btmp)) {
-    		int x=0;
-    		List<PhieuDatPhong> dstam= pdp.getAllPhieuDatPhong();
-    		String mp= txtPDP.getText().trim();
-    		for(PhieuDatPhong p: dstam) {
-    			if(mp.equals(p.getMaPhieuDatPhong().trim())) {
-    				pnlCards.removeAll();
-    				pnlCards.revalidate();
-    				pnlCards.repaint();
-    				x=1;
-    			}
-    		}
-    		if(x==0) {
-    			JOptionPane.showMessageDialog(null, "Không tìm thấy!");
-    		}
-    				
+
+    	if (o.equals(btmp)) {
+    	    String maPhieu = txtPDP.getText().trim();
+
+    	    if (maPhieu.isEmpty()) {
+    	        JOptionPane.showMessageDialog(null, "Vui lòng nhập mã phiếu đặt phòng!");
+    	        return;
+    	    }
+
+    	    PhieuDatPhong phieu = pdp.timPhieuDatPhongTheoMa(maPhieu); // ⚠️ Hàm này bạn nên có trong DAO
+    	    if (phieu == null) {
+    	        JOptionPane.showMessageDialog(null, "Không tìm thấy phiếu đặt phòng có mã: " + maPhieu);
+    	        return;
+    	    }
+
+    	    pnlCards.removeAll();
+
+    	    List<ChiTietPhieuDatPhong> dsctpdp = ctpdp.getChiTietTheoMaPhieu(phieu.getMaPhieuDatPhong());
+    	    KhachHang kh = khd.getKhachHangTheoMa(phieu.getKhachHang().getMaKhachHang());
+    	    NhanVien nv = nvd.getNhanVienTheoMa(phieu.getNhanVien().getMaNhanVien());
+
+    	    for (ChiTietPhieuDatPhong ct : dsctpdp) {
+    	        Color bgColor = Color.LIGHT_GRAY;
+    	        LocalDate today = LocalDate.now();
+
+    	        if (ct.getNgayNhanThuc().isEqual(today)) {
+    	            bgColor = Color.RED;
+    	        } else if (ct.getNgayNhanThuc().isBefore(today) && ct.getNgayTraThuc().isAfter(today)) {
+    	            bgColor = new Color(255, 215, 0); // vàng
+    	        } else if (ct.getNgayTraThuc().isEqual(today)) {
+    	            bgColor = new Color(100, 149, 237); // xanh dương
+    	        } else if (ct.getNgayNhanThuc().isAfter(today)) {
+    	            bgColor = new Color(102, 187, 106); // xanh lá
+    	        }
+
+    	        JButton btnPhieu = new JButton(
+    	            "<html>"
+    	            + "<b>Mã phiếu:</b> " + phieu.getMaPhieuDatPhong()
+    	            + "<br><b>Mã KH:</b> " + kh.getMaKhachHang()
+    	            + "<br><b>Tên KH:</b> " + kh.getHoTen()
+    	            + "<br><b>SĐT:</b> " + kh.getSoDienThoai()
+    	            + "<br><b>Mã NV:</b> " + nv.getMaNhanVien()
+    	            + "</html>"
+    	        );
+
+    	        btnPhieu.setPreferredSize(new Dimension(180, 120));
+    	        btnPhieu.setBackground(bgColor);
+    	        btnPhieu.setFocusPainted(false);
+    	        btnPhieu.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+    	        btnPhieu.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+    	        btnPhieu.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+    	        btnPhieu.addActionListener(e2 -> {
+    	            JFrame taoPhieuFrame = new JFrame("Tạo Phiếu Đặt Phòng");
+    	            taoPhieuFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    	            taoPhieuFrame.setSize(1000, 700);
+    	            taoPhieuFrame.add(new TaoPhieuDatPhong_GUI(phieu.getMaPhieuDatPhong(), kh.getMaKhachHang(), nv.getMaNhanVien()));
+    	            taoPhieuFrame.setVisible(true);
+    	        });
+
+    	        pnlCards.add(btnPhieu);
+    	    }
+
+    	    pnlCards.revalidate();
+    	    pnlCards.repaint();
     	}
+
     	if (o.equals(btsdt)) {
     	    String sdt = txtSDT.getText().trim();
     	    if (sdt.isEmpty()) {
@@ -155,7 +209,8 @@ public class DanhSachPhieuDatPhong_GUI extends JPanel implements ActionListener,
     	                Color bgColor = Color.LIGHT_GRAY;
 
     	                if (ct.getNgayNhanThuc().isBefore(LocalDate.now()) && ct.getNgayTraThuc().isAfter(LocalDate.now())) {
-    	                    bgColor = new Color(255, 215, 0);
+    	                	bgColor = new Color(255, 255, 102); // vàng sáng dễ thấy hơn
+
     	                } else if (ct.getNgayNhanThuc().isEqual(LocalDate.now())) {
     	                    bgColor = Color.RED;
     	                } else if (ct.getNgayTraThuc().isEqual(LocalDate.now())) {
@@ -163,7 +218,7 @@ public class DanhSachPhieuDatPhong_GUI extends JPanel implements ActionListener,
     	                } else if (ct.getNgayNhanThuc().isAfter(LocalDate.now())) {
     	                    bgColor = new Color(102, 187, 106);
     	                }
-
+    	                
     	                JButton btnPhieu = new JButton(
     	                        "<html>"
     	                        + "<b>Mã phiếu:</b> " + phieu.getMaPhieuDatPhong()
@@ -207,65 +262,60 @@ public class DanhSachPhieuDatPhong_GUI extends JPanel implements ActionListener,
     }
 
     public void CapNhatPhieuDatPhong() {
-    	
         pnlCards.removeAll();
-         dspdp = pdp.getAllPhieuDatPhong();
+        dspdp = pdp.getAllPhieuDatPhong();
+
+        class PhieuButton {
+            JButton button;
+            String trangThai;
+            PhieuButton(JButton b, String tt) { button = b; trangThai = tt; }
+        }
+
+        List<PhieuButton> danhSachPhieu = new ArrayList<>();
 
         for (PhieuDatPhong phieu : dspdp) {
             List<ChiTietPhieuDatPhong> dsctpdp = ctpdp.getChiTietTheoMaPhieu(phieu.getMaPhieuDatPhong());
             for (ChiTietPhieuDatPhong ct : dsctpdp) {
-                KhachHang kh = khd.getKhachHangTheoMa(phieu.getKhachHang().getMaKhachHang());
-                NhanVien nv= nvd.getNhanVienTheoMa(phieu.getNhanVien().getMaNhanVien());
-                Color bgColor = Color.LIGHT_GRAY;
-                String trangThai = "";
-                if (ct == null) continue; // tránh lỗi null
-                
-                //  Bỏ qua nếu phiếu đã hết hạn (ngày trả thực nhỏ hơn hôm nay)
-                if (ct.getNgayTraThuc().isBefore(LocalDate.now())) {
-                    continue;
-                }
+                if (ct == null) continue;
 
-                if (ct.getNgayNhanThuc().isBefore(LocalDate.now()) && ct.getNgayTraThuc().isAfter(LocalDate.now())) {
-                    bgColor = new Color(255, 215, 0);  // đang ở
-                    trangThai = "Đang ở";
-                } else if (ct.getNgayNhanThuc().isEqual(LocalDate.now())) {
-                    bgColor = Color.RED;  // tới ngày nhận phòng
+                KhachHang kh = khd.getKhachHangTheoMa(phieu.getKhachHang().getMaKhachHang());
+                NhanVien nv = nvd.getNhanVienTheoMa(phieu.getNhanVien().getMaNhanVien());
+                Color bgColor = Color.LIGHT_GRAY;
+                String trangThai = "Khác";
+
+                LocalDate today = LocalDate.now();
+
+                if (ct.getNgayNhanThuc().isEqual(today)) {
+                    bgColor = Color.RED;
                     trangThai = "Tới nhận";
-                } else if (ct.getNgayTraThuc().isEqual(LocalDate.now())) {
-                    bgColor = new Color(100, 149, 237);  // tới ngày trả phòng
-                    trangThai = "Trả phòng";
-                } else if (ct.getNgayNhanThuc().isAfter(LocalDate.now())) {
-                    bgColor = new Color(102, 187, 106);  // đã đặt
+                } else if (ct.getNgayNhanThuc().isBefore(today) && ct.getNgayTraThuc().isAfter(today)) {
+                    bgColor = new Color(255, 215, 0); // vàng
+                    trangThai = "Đang ở";
+                } else if (ct.getNgayTraThuc().isEqual(today)) {
+                    bgColor = new Color(100, 149, 237); // xanh dương
+                    trangThai = "Tới ngày trả";
+                } else if (ct.getNgayNhanThuc().isAfter(today)) {
+                    bgColor = new Color(102, 187, 106); // xanh lá
                     trangThai = "Đã đặt";
                 }
 
                 JButton btnPhieu = new JButton(
-                	    "<html>"
-                	    + "<b>Mã phiếu:</b> " + phieu.getMaPhieuDatPhong()
-                	    + "<br><b>Mã KH:</b> " + kh.getMaKhachHang()
-                	    + "<br><b>Tên KH:</b> " + kh.getHoTen()
-                	    + "<br><b>SĐT:</b> " + kh.getSoDienThoai()
-                	    + "<br><b>Mã NV:</b> " + nv.getMaNhanVien()
-                	    + "</html>"
-                	);
+                    "<html>"
+                    + "<b>Mã phiếu:</b> " + phieu.getMaPhieuDatPhong()
+                    + "<br><b>Mã KH:</b> " + kh.getMaKhachHang()
+                    + "<br><b>Tên KH:</b> " + kh.getHoTen()
+                    + "<br><b>SĐT:</b> " + kh.getSoDienThoai()
+                    + "<br><b>Mã NV:</b> " + nv.getMaNhanVien()
+                    + "</html>"
+                );
 
-                	btnPhieu.setPreferredSize(new Dimension(220, 140));
-                	btnPhieu.setBackground(bgColor);
-                	btnPhieu.setFocusPainted(false);
-                	btnPhieu.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-                	btnPhieu.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
-                	btnPhieu.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-
-
-                btnPhieu.setPreferredSize(new Dimension(200, 120));
+                btnPhieu.setPreferredSize(new Dimension(180, 120));
                 btnPhieu.setBackground(bgColor);
                 btnPhieu.setFocusPainted(false);
                 btnPhieu.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
-                btnPhieu.setCursor(new Cursor(Cursor.HAND_CURSOR));
                 btnPhieu.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+                btnPhieu.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-                // 🔹 Sự kiện click nút
                 btnPhieu.addActionListener(e -> {
                     JFrame taoPhieuFrame = new JFrame("Tạo Phiếu Đặt Phòng");
                     taoPhieuFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -274,14 +324,29 @@ public class DanhSachPhieuDatPhong_GUI extends JPanel implements ActionListener,
                     taoPhieuFrame.setVisible(true);
                 });
 
-
-
-                pnlCards.add(btnPhieu);
-                break;
+                danhSachPhieu.add(new PhieuButton(btnPhieu, trangThai));
             }
         }
 
+        // Sắp xếp theo màu / trạng thái
+        danhSachPhieu.sort(Comparator.comparingInt(pb -> switch (pb.trangThai) {
+            case "Tới nhận" -> 1;
+            case "Đang ở" -> 2;
+            case "Tới ngày trả" -> 3;
+            case "Đã đặt" -> 4;
+            default -> 5;
+        }));
+
+        pnlCards.setLayout(new GridLayout(0, 6, 10, 10));
+
+        for (PhieuButton pb : danhSachPhieu) {
+            pnlCards.add(pb.button);
+        }
+
+        pnlCards.revalidate();
+        pnlCards.repaint();
     }
+
     private JPanel createLegend(Color color, String text) {
         JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         JLabel box = new JLabel();

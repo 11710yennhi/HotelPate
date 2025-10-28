@@ -42,7 +42,7 @@ public class TaoPhieuDatPhong_GUI extends JPanel implements ActionListener, Mous
     // <-- DefaultTableModel toàn cục (đã tách ra)
     private DefaultTableModel dlp, dlctps;
     private JComboBox<String> cboTrangThai, cboChiPhi;
-    private JButton btnInPhieu, btnThem, btnXoa, btnThemCP, btnXoaCP, btnLuu, btnHuy, btnTT, btnThoat, btnCapNhat,btn;
+    private JButton btnInPhieu, btnTinh, btnXoa, btnThemCP, btnXoaCP, btnLuu, btnHuy, btnTT, btnThoat, btnCapNhat,btn;
     private JTable tblPhong, tblChiPhi;
     private JLabel lblTongTien, lblTongCP, lblTongTatCa;
     private Color mauXanhDam, mauVangDong;
@@ -241,10 +241,10 @@ public class TaoPhieuDatPhong_GUI extends JPanel implements ActionListener, Mous
 
         JPanel pPhongBtn = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         pPhongBtn.setBackground(Color.WHITE);
-        btnThem = new JButton("Thêm");
+        btnTinh = new JButton("Tính");
         btnXoa = new JButton("Xóa");
         lblTongTien = new JLabel("Tổng tiền: 0 VNĐ");
-        pPhongBtn.add(btnThem);
+        pPhongBtn.add(btnTinh);
         pPhongBtn.add(btnXoa);
         pPhongBtn.add(lblTongTien);
         pChiTietPhong.add(pPhongBtn, BorderLayout.SOUTH);
@@ -350,7 +350,7 @@ public class TaoPhieuDatPhong_GUI extends JPanel implements ActionListener, Mous
         // add các phần vào pRight
         pRight.add(scrPhongTrong);
         pRight.add(Box.createVerticalStrut(10));
-        scrPhongTrong.setMaximumSize(new Dimension(Integer.MAX_VALUE, 400)); // hoặc 350, tuỳ chiều cao bạn muốn
+        scrPhongTrong.setMaximumSize(new Dimension(Integer.MAX_VALUE, 400)); 
         pRight.add(pChiPhi);
 
         // ====== ADD 2 PANEL VÀO SPLITPANE ======
@@ -372,20 +372,24 @@ public class TaoPhieuDatPhong_GUI extends JPanel implements ActionListener, Mous
             }
         });
 
-       
+//        PhieuDatPhong pdptam= doiTuongTongTienPhong();
+//        txtTienCoc.setText(String.format("%,.000f", pdptam.getTienCoc()));
+
         
 //        btn.addActionListener(this);
         btnCapNhat.addActionListener(this);
         btnHuy.addActionListener(this);
         btnInPhieu.addActionListener(this);
         btnLuu.addActionListener(this);
-        btnThem.addActionListener(this);
+        btnTinh.addActionListener(this);
         btnThemCP.addActionListener(this);
         btnThoat.addActionListener(this);
         btnTT.addActionListener(this);
         btnXoa.addActionListener(this);
         
-        hienThiTienCocVaTienTongTienPhong();
+
+        
+//        hienThiTienCocVaTienTongTienPhong();
 
     }
 
@@ -514,8 +518,9 @@ public class TaoPhieuDatPhong_GUI extends JPanel implements ActionListener, Mous
                     );
                     dsctpdp.themChiTietPhieuDatPhong(ctMoi);
                 }
-                new InPhieuDatPhong_GUI(phieuMoi);
+//                new InPhieuDatPhong_GUI(phieuMoi);
                 JOptionPane.showMessageDialog(null, "Đã thêm phiếu đặt phòng và chi tiết mới!");
+                new InPhieuDatPhong_GUI(phieuMoi);
             }
         }
 
@@ -524,17 +529,35 @@ public class TaoPhieuDatPhong_GUI extends JPanel implements ActionListener, Mous
 //        	JOptionPane.showMessageDialog(null,"Cap nhat thanh cong!");
         }
         else if(o.equals(btnThoat)) {  
-//   			 int confirm = JOptionPane.showConfirmDialog(null, "Bạn có chắc chắn muốn đăng xuất?", "Xác nhận", JOptionPane.YES_NO_OPTION);
-//   		        if (confirm == JOptionPane.YES_OPTION) {
-//   		        	System.exit(1);
-//   		        }
-        	  hienThiTienCocVaTienTongTienPhong();
+   			 int confirm = JOptionPane.showConfirmDialog(null, "Bạn có chắc chắn muốn đăng xuất?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+   		        if (confirm == JOptionPane.YES_OPTION) {
+   		        	System.exit(1);
+   		        }
+//        	  hienThiTienCocVaTienTongTienPhong();
    		
         }
         else if(o.equals(btnThemCP)) {
         	themCPPSXB();
         	
             
+        }
+        else if(o.equals(btnInPhieu)) {
+        	int x=0;
+        	for(PhieuDatPhong p: pdp.getAllPhieuDatPhong()) {
+        		if(p.getMaPhieuDatPhong().equals(txtMPDP.getText())) {
+        			new InPhieuDatPhong_GUI(p);
+        			x=1;
+        			return;
+        		}
+        	}
+        	if(x==0) {
+        		JOptionPane.showMessageDialog(null,"Phiếu đặt phòng đang được khởi tạo "
+        				+ "cần hoàn thành trước khi in!");
+        	}
+        	return;
+        }
+        else if(o.equals(btnTinh)) {
+        	hienThiTienCocVaTienTongTienPhong();
         }
         }
     
@@ -545,6 +568,7 @@ public class TaoPhieuDatPhong_GUI extends JPanel implements ActionListener, Mous
     public class InPhieuDatPhong_GUI extends JFrame {
 
         public InPhieuDatPhong_GUI(PhieuDatPhong phieu) {
+        	PhieuDatPhong pdpp = doiTuongTongTienPhong();
             setTitle("Phiếu đặt phòng");
             setSize(800, 700);
             setLocationRelativeTo(null);
@@ -593,8 +617,8 @@ public class TaoPhieuDatPhong_GUI extends JPanel implements ActionListener, Mous
             // Giả sử bạn có danh sách phòng từ phiếu đặt phòng
             List<ChiTietPhieuDatPhong> danhSachCTPDP= dsctpdp.getChiTietTheoMaPhieu(phieu.getMaPhieuDatPhong());
             int stt = 1;
+            
             for (ChiTietPhieuDatPhong p : danhSachCTPDP) {
-                PhieuDatPhong pdpp = doiTuongTongTienPhong();
                 String tongTienPhong = String.format("%,.0f VNĐ", phieu.getTongTienPhong());
 
                 Object[] row = {
@@ -607,6 +631,7 @@ public class TaoPhieuDatPhong_GUI extends JPanel implements ActionListener, Mous
                     String.format("%,.0f", p.getPhong().getLoaiPhong().getGia()),
                     pdpp.getTongTienPhong()
                 };
+                System.out.println("Test"+ pdpp.getTongTien());
                 model.addRow(row);
             }
 
@@ -615,16 +640,38 @@ public class TaoPhieuDatPhong_GUI extends JPanel implements ActionListener, Mous
             centerPanel.add(scroll);
             centerPanel.add(Box.createVerticalStrut(15));
 
-            // --- Tổng tiền và ghi chú ---
+      
+         // --- Tổng tiền và ghi chú ---
             JPanel bottomPanel = new JPanel();
             bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));
             bottomPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0)); // cách trái 10px, bạn có thể chỉnh 0 nếu muốn sát hẳn
 
-            bottomPanel.add(new JLabel("Tổng tiền phòng: " + String.format("%,.0f VNĐ", phieu.getTongTienPhong())));
-            bottomPanel.add(new JLabel("Tiền cọc: " + String.format("%,.0f VNĐ", phieu.getTienCoc())));
-            bottomPanel.add(new JLabel("Ghi chú: ......................................................"));
-            bottomPanel.add(new JLabel("......................................................................"));
+            JLabel lblTongTien = new JLabel("Tổng tiền phòng: " + String.format("%,.0f VNĐ", pdpp.getTongTienPhong()));
+            JLabel lblTienCoc = new JLabel("Tiền cọc: " + String.format("%,.0f VNĐ", pdpp.getTienCoc()));
+
+            JLabel lblNote1 = new JLabel("Ghi chú: Khách hàng mang theo Căn cước công dân hoặc Passport để nhận phòng.");
+            JLabel lblNote2 = new JLabel("Đối với khách từ 14 tuổi trở lên cần cung cấp giấy tờ tùy thân hợp lệ.");
+            JLabel lblNote3 = new JLabel("Khách dưới 14 tuổi sẽ được bảo lãnh, cung cấp đầy đủ họ tên và ngày tháng năm sinh.");
+
+            // Căn trái tất cả các label
+            lblTongTien.setAlignmentX(Component.LEFT_ALIGNMENT);
+            lblTienCoc.setAlignmentX(Component.LEFT_ALIGNMENT);
+            lblNote1.setAlignmentX(Component.LEFT_ALIGNMENT);
+            lblNote2.setAlignmentX(Component.LEFT_ALIGNMENT);
+            lblNote3.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            bottomPanel.add(lblTongTien);
+            bottomPanel.add(lblTienCoc);
+            bottomPanel.add(Box.createVerticalStrut(10)); // khoảng cách nhỏ
+            bottomPanel.add(lblNote1);
+            bottomPanel.add(lblNote2);
+            bottomPanel.add(lblNote3);
+
+            // Thêm panel này vào phần trung tâm
             centerPanel.add(bottomPanel);
+
+
 
             setVisible(true);
         }
@@ -974,7 +1021,7 @@ public class TaoPhieuDatPhong_GUI extends JPanel implements ActionListener, Mous
     // dùng model (dlp) để addRow thay vì gọi vào JTable
     public TaoPhieuDatPhong_GUI(String maPhieu, String maKhachHang, String maNV) {
     	this(maNV);
-    	hienThiTienCocVaTienTongTienPhong();
+    	
         // đảm bảo dsctpdp đã được khởi tạo (nếu cần)
         dsctpdp = new ChiTietPhieuDatPhong_DAO();
         // nếu dlp chưa khởi tạo (trường hợp gọi constructor này trực tiếp), khởi tạo model và table
@@ -1008,7 +1055,18 @@ public class TaoPhieuDatPhong_GUI extends JPanel implements ActionListener, Mous
         txtNV.setText(maNV);
         txtSDT.setText(kh.getSoDienThoai());
         txtMPDP.setText(maPhieu);
+        PhieuDatPhong tam= pdp.timPhieuDatPhongTheoMa(maPhieu);
+        cboTrangThai.setSelectedItem(tam.getTrangThai());
+//        PhieuDatPhong tam2= doiTuongTongTienPhong();
+//        txtTienCoc.setText(String.format("%,.0f", tam2.getTienCoc()));
+//        lblTongTien.setText("Tổng tiền: "+String.format("%,.0f",tam2.getTongTienPhong()));
+        hienThiTienCocVaTienTongTienPhong();
     }
+    
+    
+    
+    
+    
     
     private JPanel createRoomSection(String title, List<String> dsMaPhong, Color mauXanhDam, Color mauVangDong) {
         JPanel p = new JPanel(new BorderLayout());
@@ -1177,11 +1235,11 @@ public class TaoPhieuDatPhong_GUI extends JPanel implements ActionListener, Mous
         return maKH;
     }
     public PhieuDatPhong doiTuongTongTienPhong() {
-    	System.out.println("DEBUG: model dlp = " + dlp);
-    	System.out.println("DEBUG: table model = " + tblPhong.getModel());
-    	System.out.println("DEBUG: so dong dlp = " + dlp.getRowCount());
-    	System.out.println("DEBUG: so dong table = " + tblPhong.getRowCount());
-    	System.out.println(dlp.getRowCount());
+//    	System.out.println("DEBUG: model dlp = " + dlp);
+//    	System.out.println("DEBUG: table model = " + tblPhong.getModel());
+//    	System.out.println("DEBUG: so dong dlp = " + dlp.getRowCount());
+//    	System.out.println("DEBUG: so dong table = " + tblPhong.getRowCount());
+//    	System.out.println(dlp.getRowCount());
 
         PhieuDatPhong tam = new PhieuDatPhong();
 
@@ -1218,6 +1276,8 @@ public class TaoPhieuDatPhong_GUI extends JPanel implements ActionListener, Mous
             tam.themChiTiet(ct);
            
         }
+//        txtTienCoc.setText(String.format("%,.0f", tam.getTienCoc()));
+//        lblTongTien.setText("Tổng tiền: "+String.format("%,.0f",tam.getTongTienPhong()));
         System.out.println(tam.getTienCoc());
         return tam;
     }
@@ -1244,11 +1304,7 @@ public class TaoPhieuDatPhong_GUI extends JPanel implements ActionListener, Mous
     	            txtTenKH.setText(kh.getHoTen());
     	            // Nếu bạn có checkbox hoặc combobox cho quốc tịch:
     	            chkVN.setSelected(kh.LaNguoiVietNam());
-    	        } else {
-    	            txtMKH.setText("");
-    	            txtTenKH.setText("");
-    	            chkVN.setSelected(true); // mặc định là người Việt
-    	        }
+    	        } 
     	    }
     	});
 
