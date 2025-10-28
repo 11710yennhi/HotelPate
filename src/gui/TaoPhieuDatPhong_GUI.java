@@ -19,6 +19,7 @@ import com.toedter.calendar.JDateChooser;
 import dao.ChiPhiPhatSinh_DAO;
 import dao.ChiTietChiPhiPhatSinh_DAO;
 import dao.ChiTietPhieuDatPhong_DAO;
+import dao.HoaDon_DAO;
 import dao.KhachHang_DAO;
 import dao.LoaiPhong_DAO;
 import dao.NhanVien_DAO;
@@ -559,7 +560,27 @@ public class TaoPhieuDatPhong_GUI extends JPanel implements ActionListener, Mous
         else if(o.equals(btnTinh)) {
         	hienThiTienCocVaTienTongTienPhong();
         }
+        else if(o.equals(btnTT)) {
+            String maPhieuDatPhong = txtMPDP.getText().trim(); // lấy PDP hiện tại
+            HoaDon_DAO hdDAO = new HoaDon_DAO();
+            String maHoaDon = hdDAO.getMaHoaDonTheoPhieu(maPhieuDatPhong);
+
+            if(maHoaDon == null) {
+                // Nếu chưa có hóa đơn, tạo mới
+                maHoaDon = "HD" + maPhieuDatPhong.substring(3); // ví dụ HD + 29102025001
+                boolean taoThanhCong = hdDAO.taoHoaDonMoi(maHoaDon, maPhieuDatPhong, "Chưa thanh toán");
+                if(!taoThanhCong) {
+                    JOptionPane.showMessageDialog(this, "Tạo hóa đơn mới thất bại!");
+                    return;
+                }
+            }
+
+            // Mở Bill_GUI với maHoaDon
+            new Bill_GUI(maHoaDon).setVisible(true);
         }
+
+
+    }
     
 
     								//in phiếu đặt phòng

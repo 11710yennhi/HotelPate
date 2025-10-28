@@ -70,6 +70,13 @@ public class HoaDon {
 	public double getTongThanhToan() {
 		return tongThanhToan;
 	}
+	public void setTongTien(double tongTien) {
+	    this.tongTien = tongTien;
+	}
+
+	public void setTongThanhToan(double tongThanhToan) {
+	    this.tongThanhToan = tongThanhToan;
+	}
 
 	// TÍNH TOÁN
 
