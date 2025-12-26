@@ -1,11 +1,8 @@
 package entity;
-
 import java.util.Objects;
-
 public class TaiKhoan {
 	private NhanVien nhanVien;
-	private String matKhau;
-	
+	private String matKhau;	
 	public TaiKhoan(NhanVien nhanVien, String matKhau) {
 		super();
 		this.nhanVien = nhanVien;

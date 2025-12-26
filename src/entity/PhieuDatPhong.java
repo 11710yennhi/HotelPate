@@ -1,129 +1,180 @@
-//package entity;
-//
-//import java.time.LocalDate;
-//
-//package entity;
-//
-//import java.time.LocalDate;
-//import java.time.temporal.ChronoUnit;
-//
-//public class PhieuDatPhong {
-//    private String maPhieuDatPhong;
-//    private KhachHang khachHang;
-//    private Phong phong;
-//    private int soNguoiDiCung;
-//    private LocalDate ngayNhanPhong;
-//    private LocalDate ngayTraPhong;
-//    private LocalDate ngayTao;
-//    private String trangThai;
-//
-//    // Constructor
-//    public PhieuDatPhong(String maPhieuDatPhong, KhachHang khachHang, Phong phong,
-//                         int soNguoiDiCung, LocalDate ngayNhanPhong, LocalDate ngayTraPhong,
-//                         LocalDate ngayTao, String trangThai) {
-//        this.maPhieuDatPhong = maPhieuDatPhong;
-//        this.khachHang = khachHang;
-//        this.phong = phong;
-//        this.soNguoiDiCung = soNguoiDiCung;
-//        this.ngayNhanPhong = ngayNhanPhong;
-//        this.ngayTraPhong = ngayTraPhong;
-//        this.ngayTao = ngayTao;
-//        this.trangThai = trangThai;
-//    }
-//
-//    public PhieuDatPhong() {}
-//
-//    // Getter & Setter
-//    public String getMaPhieuDatPhong() {
-//        return maPhieuDatPhong;
-//    }
-//
-//    public void setMaPhieuDatPhong(String maPhieuDatPhong) {
-//        this.maPhieuDatPhong = maPhieuDatPhong;
-//    }
-//
-//    public KhachHang getKhachHang() {
-//        return khachHang;
-//    }
-//
-//    public void setKhachHang(KhachHang khachHang) {
-//        this.khachHang = khachHang;
-//    }
-//
-//    public Phong getPhong() {
-//        return phong;
-//    }
-//
-//    public void setPhong(Phong phong) {
-//        this.phong = phong;
-//    }
-//
-//    public int getSoNguoiDiCung() {
-//        return soNguoiDiCung;
-//    }
-//
-//    public void setSoNguoiDiCung(int soNguoiDiCung) {
-//        this.soNguoiDiCung = soNguoiDiCung;
-//    }
-//
-//    public LocalDate getNgayNhanPhong() {
-//        return ngayNhanPhong;
-//    }
-//
-//    public void setNgayNhanPhong(LocalDate ngayNhanPhong) {
-//        this.ngayNhanPhong = ngayNhanPhong;
-//    }
-//
-//    public LocalDate getNgayTraPhong() {
-//        return ngayTraPhong;
-//    }
-//
-//    public void setNgayTraPhong(LocalDate ngayTraPhong) {
-//        this.ngayTraPhong = ngayTraPhong;
-//    }
-//
-//    public LocalDate getNgayTao() {
-//        return ngayTao;
-//    }
-//
-//    public void setNgayTao(LocalDate ngayTao) {
-//        this.ngayTao = ngayTao;
-//    }
-//
-//    public String getTrangThai() {
-//        return trangThai;
-//    }
-//
-//    public void setTrangThai(String trangThai) {
-//        this.trangThai = trangThai;
-//    }
-//
-//    // ✅ Tính số ngày thuê
-//    public long getSoNgayThue() {
-//        return ChronoUnit.DAYS.between(ngayNhanPhong, ngayTraPhong);
-//    }
-//
-//    // ✅ Tính tổng tiền (giá phòng × số ngày)
-//    public double getTongTien() {
-//        return phong.getGiaPhong() * getSoNgayThue();
-//    }
-//
-//    // ✅ Thuộc tính dẫn xuất: tiền cọc = 30% tổng tiền
-//    public double getTienCoc() {
-//        return getTongTien() * 0.3;
-//    }
-//
-//    @Override
-//    public String toString() {
-//        return "PhieuDatPhong [maPhieu=" + maPhieuDatPhong +
-//                ", khachHang=" + khachHang.getTenKhachHang() +
-//                ", phong=" + phong.getMaPhong() +
-//                ", soNguoiDiCung=" + soNguoiDiCung +
-//                ", ngayNhan=" + ngayNhanPhong +
-//                ", ngayTra=" + ngayTraPhong +
-//                ", ngayTao=" + ngayTao +
-//                ", tongTien=" + getTongTien() +
-//                ", tienCoc=" + getTienCoc() +
-//                ", trangThai=" + trangThai + "]";
-//    }
-//}
+package entity;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+public class PhieuDatPhong {
+    private String maPhieuDatPhong;
+    private KhachHang khachHang;
+    private NhanVien nhanVien;
+    private LocalDate ngayTao;
+    private String trangThai;
+
+    private double tongTienPhong;             // thuộc tính dẫn xuất
+    private double tongTienChiPhiPhatSinh;    // thuộc tính dẫn xuất
+    private double tongTien;                  // thuộc tính dẫn xuất
+    private double tienCoc;                   // thuộc tính dẫn xuất
+
+    private List<ChiTietPhieuDatPhong> dsChiTiet;
+    private List<ChiTietChiPhiPhatSinh> dsChiPhiPhatSinh;
+
+    public PhieuDatPhong() {
+        this.dsChiTiet = new ArrayList<>();
+        this.dsChiPhiPhatSinh = new ArrayList<>();
+    }
+
+
+    public PhieuDatPhong(String maPhieuDatPhong) {
+        this.maPhieuDatPhong = maPhieuDatPhong;
+    }
+
+    public PhieuDatPhong(String maPhieuDatPhong, KhachHang khachHang, NhanVien nhanVien,
+                         LocalDate ngayTao, String trangThai) {
+        this.maPhieuDatPhong = maPhieuDatPhong;
+        this.khachHang = khachHang;
+        this.nhanVien = nhanVien;
+        this.ngayTao = ngayTao;
+        this.trangThai = trangThai;
+        this.dsChiTiet = new ArrayList<>();
+        this.dsChiPhiPhatSinh = new ArrayList<>();
+        capNhatTongTien();
+    }
+
+    public String getMaPhieuDatPhong() {
+        return maPhieuDatPhong;
+    }
+
+    public void setMaPhieuDatPhong(String maPhieuDatPhong) {
+        this.maPhieuDatPhong = maPhieuDatPhong;
+    }
+
+    public KhachHang getKhachHang() {
+        return khachHang;
+    }
+
+    public void setKhachHang(KhachHang khachHang) {
+        this.khachHang = khachHang;
+    }
+
+    public NhanVien getNhanVien() {
+        return nhanVien;
+    }
+
+    public void setNhanVien(NhanVien nhanVien) {
+        this.nhanVien = nhanVien;
+    }
+
+    public LocalDate getNgayTao() {
+        return ngayTao;
+    }
+
+    public void setNgayTao(LocalDate ngayTao) {
+        this.ngayTao = ngayTao;
+    }
+
+    public String getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(String trangThai) {
+        this.trangThai = trangThai;
+    }
+
+    public List<ChiTietPhieuDatPhong> getDsChiTiet() {
+        return dsChiTiet;
+    }
+
+    public void setDsChiTiet(List<ChiTietPhieuDatPhong> dsChiTiet) {
+        this.dsChiTiet = dsChiTiet;
+        capNhatTongTien();
+    }
+
+    public List<ChiTietChiPhiPhatSinh> getDsChiPhiPhatSinh() {
+        return dsChiPhiPhatSinh;
+    }
+
+    public void setDsChiPhiPhatSinh(List<ChiTietChiPhiPhatSinh> dsChiPhiPhatSinh) {
+        this.dsChiPhiPhatSinh = dsChiPhiPhatSinh;
+        capNhatTongTien();
+    }
+
+
+    public void themChiTiet(ChiTietPhieuDatPhong ct) {
+        dsChiTiet.add(ct);
+        capNhatTongTien();
+    }
+
+    public void themChiPhiPhatSinh(ChiTietChiPhiPhatSinh cp) {
+        dsChiPhiPhatSinh.add(cp);
+        capNhatTongTien();
+    }
+
+    public void capNhatTongTien() {
+        tongTienPhong = 0;
+        tongTienChiPhiPhatSinh = 0;
+
+        
+        if (dsChiTiet != null) {
+            for (ChiTietPhieuDatPhong ct : dsChiTiet) {
+                tongTienPhong += ct.getThanhTien();
+                
+            }
+        }
+
+       
+        if (dsChiPhiPhatSinh != null) {
+            for (ChiTietChiPhiPhatSinh cp : dsChiPhiPhatSinh) {
+                tongTienChiPhiPhatSinh += cp.getThanhTien();
+            }
+        }
+
+     
+        tongTien = tongTienPhong + tongTienChiPhiPhatSinh;
+        tienCoc = tongTienPhong * 0.5; 
+    }
+
+    public double getTongTienPhong() {
+        return tongTienPhong;
+    }
+
+    public double getTongTienChiPhiPhatSinh() {
+        return tongTienChiPhiPhatSinh;
+    }
+
+    public double getTongTien() {
+        return tongTien;
+    }
+
+    public double getTienCoc() {
+        return tienCoc;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(maPhieuDatPhong);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        PhieuDatPhong other = (PhieuDatPhong) obj;
+        return Objects.equals(maPhieuDatPhong, other.maPhieuDatPhong);
+    }
+
+	@Override
+	public String toString() {
+		return "PhieuDatPhong [maPhieuDatPhong=" + maPhieuDatPhong + ", khachHang=" + khachHang + ", nhanVien="
+				+ nhanVien + ", ngayTao=" + ngayTao + ", trangThai=" + trangThai + ", tongTienPhong=" + tongTienPhong
+				+ ", tongTienChiPhiPhatSinh=" + tongTienChiPhiPhatSinh + ", tongTien=" + tongTien + ", tienCoc="
+				+ tienCoc + ", dsChiTiet=" + dsChiTiet + ", dsChiPhiPhatSinh=" + dsChiPhiPhatSinh + "]";
+	}
+
+   
+}
